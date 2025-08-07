@@ -1,0 +1,65 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <AssemblyName>SysmacVariableBackupViewer</AssemblyName>
+    <RootNamespace>SysmacVariableBackupViewer</RootNamespace>
+    <ApplicationIcon>app.ico</ApplicationIcon>
+
+    
+    <!-- 単一ファイル設定 -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    
+    <!-- 起動高速化設定 -->
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    
+    <!-- ファイルサイズ最適化設定 -->
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <OptimizeImplicitlyTriggeredBuild>true</OptimizeImplicitlyTriggeredBuild>
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+    <RunAnalyzersDuringBuild>false</RunAnalyzersDuringBuild>
+    <RunAnalyzersDuringLiveAnalysis>false</RunAnalyzersDuringLiveAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    
+    <!-- 安全なトリミング設定 -->
+    <EnableTrimming>true</EnableTrimming>
+    <TrimMode>link</TrimMode>
+    <SuppressTrimAnalysisWarnings>true</SuppressTrimAnalysisWarnings>
+    
+    <!-- 不要なファイルを除外 -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    
+    <!-- 最適化設定 -->
+    <Optimize>true</Optimize>
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Encoding.CodePages" Version="7.0.0" />
+  </ItemGroup>
+
+  <!-- 不要なファイルを除外 -->
+  <ItemGroup>
+    <Compile Remove="**/*.Designer.cs" />
+    <EmbeddedResource Remove="**/*.Designer.resx" />
+  </ItemGroup>
+  
+  <!-- アイコンファイル -->
+  <ItemGroup>
+    <Content Include="app.ico" />
+  </ItemGroup>
+  
+
+
+</Project> 
