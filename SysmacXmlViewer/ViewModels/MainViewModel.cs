@@ -59,8 +59,6 @@ namespace SysmacXmlViewer.ViewModels
             {
                 if (SetProperty(ref _filterText, value))
                 {
-                    // デバッグ用ログ
-                    System.Diagnostics.Debug.WriteLine($"FilterText changed to: '{value}'");
                     // 非同期でフィルタリングを実行
                     _ = Task.Run(() => ApplyFiltersAsync());
                 }
@@ -269,7 +267,6 @@ namespace SysmacXmlViewer.ViewModels
             if (!string.IsNullOrWhiteSpace(FilterText))
             {
                 var filterLower = FilterText.ToLowerInvariant();
-                System.Diagnostics.Debug.WriteLine($"Filtering with text: '{FilterText}' (lower: '{filterLower}')");
                 filtered = filtered.Where(v => 
                     v.Name.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
                     v.DataType.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
@@ -280,12 +277,10 @@ namespace SysmacXmlViewer.ViewModels
             // データ型でフィルタ（STRING[]型を統一）
             if (!string.IsNullOrWhiteSpace(SelectedDataType) && SelectedDataType != "All")
             {
-                System.Diagnostics.Debug.WriteLine($"Filtering by data type: '{SelectedDataType}'");
                 filtered = filtered.Where(v => NormalizeDataType(v.DataType) == SelectedDataType);
             }
 
             var result = filtered.ToList();
-            System.Diagnostics.Debug.WriteLine($"Filter result: {result.Count} items");
             return result;
         }
 

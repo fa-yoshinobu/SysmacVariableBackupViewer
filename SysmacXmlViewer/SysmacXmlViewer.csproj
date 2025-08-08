@@ -8,6 +8,9 @@
     <AssemblyName>SysmacVariableBackupViewer</AssemblyName>
     <RootNamespace>SysmacVariableBackupViewer</RootNamespace>
     <ApplicationIcon>app.ico</ApplicationIcon>
+    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
 
     
     <!-- 単一ファイル設定 -->

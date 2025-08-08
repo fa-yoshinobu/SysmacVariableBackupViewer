@@ -19,6 +19,12 @@ namespace SysmacXmlViewer.Services
             if (string.IsNullOrEmpty(rawValue))
                 return string.Empty;
 
+            // デバッグ用: キャッシュをクリア
+            if (dataType.ToUpperInvariant() == "DATE_AND_TIME" || dataType.ToUpperInvariant() == "DATE")
+            {
+                ClearCache();
+            }
+
             // キャッシュキーを作成
             string cacheKey = $"{dataType}_{rawValue}";
             
@@ -128,49 +134,17 @@ namespace SysmacXmlViewer.Services
                     // ナノ秒を秒に変換
                     long seconds = nanoseconds / 1_000_000_000;
                     
-                    // Unix時間（1970年1月1日からの秒数）として解釈
-                    DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(seconds).DateTime;
+                    // Sysmac Studioの基準日時: 1970年1月1日 00:00:00 (Unix時間)
+                    DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     
+                    // 基準日時からの経過秒数として解釈
+                    DateTime dateTime = baseDateTime.AddSeconds(seconds);
+                    
+                    // DATE_AND_TIME形式: yyyy-MM-dd-HH:mm:ss.ff
                     return dateTime.ToString("yyyy-MM-dd-HH:mm:ss.ff");
                 }
                 
                 // 変換できない場合は元の値を返す
-                return rawValue;
-            }
-            catch
-            {
-                return rawValue;
-            }
-        }
-
-        public static string ConvertTimeToString(string rawValue)
-        {
-            try
-            {
-                if (long.TryParse(rawValue, out long nanoseconds))
-                {
-                    // ナノ秒を秒に変換
-                    double totalSeconds = nanoseconds / 1_000_000_000.0;
-                    
-                    // 時、分、秒、ミリ秒に分解
-                    int hours = (int)(totalSeconds / 3600);
-                    int minutes = (int)((totalSeconds % 3600) / 60);
-                    int seconds = (int)(totalSeconds % 60);
-                    int milliseconds = (int)((totalSeconds * 1000) % 1000);
-                    
-                    // 時間形式で表示（例: 3h29m15s10.000ms）
-                    var parts = new List<string>();
-                    
-                    if (hours > 0)
-                        parts.Add($"{hours}h");
-                    if (minutes > 0)
-                        parts.Add($"{minutes}m");
-                    if (seconds > 0)
-                        parts.Add($"{seconds}s");
-                    parts.Add($"{milliseconds}.000ms");
-                    
-                    return string.Join("", parts);
-                }
                 return rawValue;
             }
             catch
@@ -188,10 +162,98 @@ namespace SysmacXmlViewer.Services
                     // ナノ秒を秒に変換
                     long seconds = nanoseconds / 1_000_000_000;
                     
-                    // Unix時間（1970年1月1日からの秒数）として解釈
-                    DateTime dateTime = DateTimeOffset.FromUnixTimeSeconds(seconds).DateTime;
+                    // Sysmac Studioの基準日時: 1970年1月1日 00:00:00 (Unix時間)
+                    DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     
+                    // 基準日時からの経過秒数として解釈
+                    DateTime dateTime = baseDateTime.AddSeconds(seconds);
+                    
+                    // DATE形式: yyyy-MM-dd
                     return dateTime.ToString("yyyy-MM-dd");
+                }
+                return rawValue;
+            }
+            catch
+            {
+                return rawValue;
+            }
+        }
+
+        public static string ConvertTimeToString(string rawValue)
+        {
+            try
+            {
+                if (long.TryParse(rawValue, out long nanoseconds))
+                {
+                    // 負の値の処理（long.MinValueの特殊ケースを考慮）
+                    bool isNegative;
+                    long absNanoseconds;
+                    
+                    if (nanoseconds == long.MinValue)
+                    {
+                        // long.MinValueの場合は、直接計算で処理
+                        absNanoseconds = long.MaxValue;
+                        // 1を加算（オーバーフローを避けるため、計算を分離）
+                        absNanoseconds = unchecked(absNanoseconds + 1L);
+                        // long.MinValueの場合は必ず負の値として扱う
+                        isNegative = true;
+                        
+                        // absNanosecondsが負の値の場合は正の値に修正
+                        if (absNanoseconds < 0)
+                        {
+                            absNanoseconds = Math.Abs(absNanoseconds);
+                        }
+                    }
+                    else
+                    {
+                        isNegative = nanoseconds < 0;
+                        absNanoseconds = Math.Abs(nanoseconds);
+                    }
+                    
+                    // absNanosecondsが負の値の場合は正の値に修正
+                    if (absNanoseconds < 0)
+                    {
+                        absNanoseconds = Math.Abs(absNanoseconds);
+                    }
+                    
+                    // ナノ秒を秒に変換（大きな値に対応するためdoubleを使用）
+                    double totalSeconds = absNanoseconds / 1_000_000_000.0;
+                    
+                    // 日、時、分、秒、ミリ秒に分解
+                    long totalDays = (long)(totalSeconds / 86400);
+                    int hours = (int)((totalSeconds % 86400) / 3600);
+                    int minutes = (int)((totalSeconds % 3600) / 60);
+                    int seconds = (int)(totalSeconds % 60);
+                    double milliseconds = (totalSeconds * 1000) % 1000;
+                    
+                    // 時間形式で表示（例: -106751d23h47m16s854.775ms）
+                    var parts = new List<string>();
+                    
+                    if (isNegative)
+                    {
+                        parts.Add("-");
+                    }
+                    
+                    if (totalDays > 0)
+                    {
+                        parts.Add($"{totalDays}d");
+                    }
+                    if (hours > 0)
+                    {
+                        parts.Add($"{hours}h");
+                    }
+                    if (minutes > 0)
+                    {
+                        parts.Add($"{minutes}m");
+                    }
+                    if (seconds > 0)
+                    {
+                        parts.Add($"{seconds}s");
+                    }
+                    parts.Add($"{milliseconds:F3}ms");
+                    
+                    string result = string.Join("", parts);
+                    return result;
                 }
                 return rawValue;
             }
@@ -355,18 +417,19 @@ namespace SysmacXmlViewer.Services
         {
             try
             {
-                // YYYY/MM/DD hh:mm:ss 形式の文字列をDATE_AND_TIME形式に変換
-                if (DateTime.TryParseExact(displayValue, "yyyy/MM/dd HH:mm:ss", 
+                // YYYY-MM-dd-HH:mm:ss.ff 形式の文字列をDATE_AND_TIME形式に変換
+                if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd-HH:mm:ss.ff", 
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
                 {
-                    // 基準日時: 2001年1月1日 00:00:00
-                    DateTime baseDateTime = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    // 基準日時: 1970年1月1日 00:00:00
+                    DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     
                     // 経過秒数を計算
                     TimeSpan timeSpan = dateTime - baseDateTime;
                     long seconds = (long)timeSpan.TotalSeconds;
+                    long nanoseconds = seconds * 1_000_000_000;
                     
-                    return seconds.ToString();
+                    return nanoseconds.ToString();
                 }
                 
                 return displayValue;
@@ -394,15 +457,73 @@ namespace SysmacXmlViewer.Services
         {
             try
             {
-                // "100.000ms" 形式の文字列をナノ秒に変換
+                // "-106751d23h47m16s854.775ms" 形式の文字列をナノ秒に変換
                 if (displayValue.EndsWith("ms"))
                 {
-                    string numberPart = displayValue.Substring(0, displayValue.Length - 2);
-                    if (double.TryParse(numberPart, out double milliseconds))
+                    string timePart = displayValue.Substring(0, displayValue.Length - 2);
+                    
+                    // 負の値の処理
+                    bool isNegative = timePart.StartsWith("-");
+                    if (isNegative)
                     {
-                        long nanoseconds = (long)(milliseconds * 1_000_000);
-                        return nanoseconds.ToString();
+                        timePart = timePart.Substring(1); // マイナス記号を除去
                     }
+                    
+                    // 日、時、分、秒、ミリ秒を解析
+                    int days = 0, hours = 0, minutes = 0, seconds = 0;
+                    double milliseconds = 0;
+                    
+                    // 正規表現で各部分を抽出
+                    var dayMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)d");
+                    if (dayMatch.Success)
+                    {
+                        days = int.Parse(dayMatch.Groups[1].Value);
+                        timePart = timePart.Replace(dayMatch.Value, "");
+                    }
+                    
+                    var hourMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)h");
+                    if (hourMatch.Success)
+                    {
+                        hours = int.Parse(hourMatch.Groups[1].Value);
+                        timePart = timePart.Replace(hourMatch.Value, "");
+                    }
+                    
+                    var minuteMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)m");
+                    if (minuteMatch.Success)
+                    {
+                        minutes = int.Parse(minuteMatch.Groups[1].Value);
+                        timePart = timePart.Replace(minuteMatch.Value, "");
+                    }
+                    
+                    var secondMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)s");
+                    if (secondMatch.Success)
+                    {
+                        seconds = int.Parse(secondMatch.Groups[1].Value);
+                        timePart = timePart.Replace(secondMatch.Value, "");
+                    }
+                    
+                    // ミリ秒部分を解析（新しい形式: 854.775ms）
+                    if (timePart.Length > 0)
+                    {
+                        milliseconds = double.Parse(timePart, System.Globalization.CultureInfo.InvariantCulture);
+                    }
+                    
+                    // 総ナノ秒数を計算
+                    long totalNanoseconds = (long)(
+                        days * 86400L * 1_000_000_000L +
+                        hours * 3600L * 1_000_000_000L +
+                        minutes * 60L * 1_000_000_000L +
+                        seconds * 1_000_000_000L +
+                        milliseconds * 1_000_000L
+                    );
+                    
+                    // 負の値の場合はマイナスを付ける
+                    if (isNegative)
+                    {
+                        totalNanoseconds = -totalNanoseconds;
+                    }
+                    
+                    return totalNanoseconds.ToString();
                 }
                 return displayValue;
             }
@@ -420,10 +541,14 @@ namespace SysmacXmlViewer.Services
                 if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd", 
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateTime))
                 {
-                    // Unix時間（1970年1月1日からの秒数）に変換
-                    DateTimeOffset dateTimeOffset = new DateTimeOffset(parsedDateTime);
-                    long seconds = dateTimeOffset.ToUnixTimeSeconds();
+                    // 基準日時: 1970年1月1日 00:00:00
+                    DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    
+                    // 経過秒数を計算
+                    TimeSpan timeSpan = parsedDateTime - baseDateTime;
+                    long seconds = (long)timeSpan.TotalSeconds;
                     long nanoseconds = seconds * 1_000_000_000;
+                    
                     return nanoseconds.ToString();
                 }
                 return displayValue;
@@ -521,19 +646,20 @@ namespace SysmacXmlViewer.Services
                     // ナノ秒を秒に変換
                     long seconds = nanoseconds / 1_000_000_000;
                     
-                    // Unix時間（1970年1月1日からの秒数）として解釈
-                    DateTime parsedDateTime = DateTimeOffset.FromUnixTimeSeconds(seconds).DateTime;
+                    // Sysmac Studioの基準日時: 1970年1月1日 00:00:00
+                    DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    DateTime parsedDateTime = baseDateTime.AddSeconds(seconds);
                     
-                    // 妥当な範囲かチェック（例: 1970年～2100年）
-                    return parsedDateTime.Year >= 1970 && parsedDateTime.Year <= 2100;
+                    // 妥当な範囲かチェック（例: 1970年～2106年）
+                    return parsedDateTime.Year >= 1970 && parsedDateTime.Year <= 2106;
                 }
                 
                 // 文字列形式の場合（yyyy-MM-dd-HH:mm:ss.ff）
                 if (DateTime.TryParseExact(value, "yyyy-MM-dd-HH:mm:ss.ff", 
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateAndTime))
                 {
-                    // 妥当な範囲かチェック（例: 1970年～2100年）
-                    return parsedDateAndTime.Year >= 1970 && parsedDateAndTime.Year <= 2100;
+                    // 妥当な範囲かチェック（例: 1970年～2106年）
+                    return parsedDateAndTime.Year >= 1970 && parsedDateAndTime.Year <= 2106;
                 }
                 
                 return false;
@@ -551,15 +677,31 @@ namespace SysmacXmlViewer.Services
                 // 数値形式の場合（ナノ秒）
                 if (long.TryParse(value, out long nanoseconds))
                 {
-                    // 妥当な範囲かチェック（例: 0～1日分のナノ秒）
-                    return nanoseconds >= 0 && nanoseconds <= 86_400_000_000_000L;
+                    // 妥当な範囲かチェック（負の値も含む）
+                    long absNanoseconds = Math.Abs(nanoseconds);
+                    return absNanoseconds <= 86_400_000_000_000L;
                 }
                 
-                // 文字列形式の場合（100.000ms）
+                // 文字列形式の場合（-106751d23h47m16s854.775ms）
                 if (value.EndsWith("ms"))
                 {
-                    string numberPart = value.Substring(0, value.Length - 2);
-                    if (double.TryParse(numberPart, out double milliseconds))
+                    string timePart = value.Substring(0, value.Length - 2);
+                    
+                    // 負の値の処理
+                    if (timePart.StartsWith("-"))
+                    {
+                        timePart = timePart.Substring(1);
+                    }
+                    
+                    // 時間形式の妥当性チェック
+                    if (timePart.Contains("d") || timePart.Contains("h") || timePart.Contains("m") || timePart.Contains("s"))
+                    {
+                        // 時間形式の場合は基本的に妥当とする
+                        return true;
+                    }
+                    
+                    // 単純なミリ秒値の場合（小数点付きも対応）
+                    if (double.TryParse(timePart, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double milliseconds))
                     {
                         return milliseconds >= 0 && milliseconds <= 86400000; // 1日分のミリ秒
                     }
@@ -583,19 +725,20 @@ namespace SysmacXmlViewer.Services
                     // ナノ秒を秒に変換
                     long seconds = nanoseconds / 1_000_000_000;
                     
-                    // Unix時間（1970年1月1日からの秒数）として解釈
-                    DateTime parsedDate = DateTimeOffset.FromUnixTimeSeconds(seconds).DateTime;
+                    // Sysmac Studioの基準日時: 1970年1月1日 00:00:00
+                    DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                    DateTime parsedDate = baseDateTime.AddSeconds(seconds);
                     
-                    // 妥当な範囲かチェック（例: 1970年～2100年）
-                    return parsedDate.Year >= 1970 && parsedDate.Year <= 2100;
+                    // 妥当な範囲かチェック（例: 1970年～2106年）
+                    return parsedDate.Year >= 1970 && parsedDate.Year <= 2106;
                 }
                 
                 // 文字列形式の場合（yyyy-MM-dd）
                 if (DateTime.TryParseExact(value, "yyyy-MM-dd", 
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateValue))
                 {
-                    // 妥当な範囲かチェック（例: 1970年～2100年）
-                    return parsedDateValue.Year >= 1970 && parsedDateValue.Year <= 2100;
+                    // 妥当な範囲かチェック（例: 1970年～2106年）
+                    return parsedDateValue.Year >= 1970 && parsedDateValue.Year <= 2106;
                 }
                 
                 return false;
