@@ -60,6 +60,10 @@ SysmacVariableBackupViewer.exe
 - **「Export CSV」ボタン**をクリック
 - 保存先を選択してCSVファイルを出力
 
+### 6. アプリケーション情報の確認
+- **メニューバー**の「Help」→「About」をクリック
+- アプリケーションのバージョン情報、ライブラリ情報、ライセンス条項を確認
+
 ## 📁 表示される情報
 
 ### 変数一覧の列
@@ -154,10 +158,18 @@ SysmacVariableBackupViewer/
 │   │   └── MainViewModel.cs
 │   ├── Views/              # UI
 │   │   ├── MainWindow.xaml
-│   │   └── MainWindow.xaml.cs
+│   │   ├── MainWindow.xaml.cs
+│   │   ├── AboutWindow.xaml
+│   │   └── AboutWindow.xaml.cs
+│   ├── ViewModels/         # ビューモデル
+│   │   ├── MainViewModel.cs
+│   │   └── AboutViewModel.cs
 │   ├── App.xaml            # アプリケーション設定
 │   ├── SysmacXmlViewer.csproj
-│   └── build.bat           # ビルドスクリプト
+│   ├── build.bat           # ビルドスクリプト
+│   ├── LICENSE.txt         # アプリケーションライセンス
+│   └── Licenses/           # サードパーティライセンス
+│       └── THIRD_PARTY_LICENSES.txt
 ├── SysmacXmlViewer.sln     # ソリューションファイル
 └── README.md               # このファイル
 ```
@@ -199,7 +211,15 @@ SysmacVariableBackupViewer/
 
 ## 📄 ライセンス
 
-このプロジェクトはMITライセンスの下で公開されています。
+このプロジェクトは独自のライセンス条項の下で公開されています。詳細は`LICENSE.txt`ファイルを参照してください。
+
+### サードパーティライブラリ
+このアプリケーションは以下のサードパーティライブラリを使用しています：
+- **System.Text.Encoding.CodePages (7.0.0)**: MIT License
+- **.NET 6.0 Runtime**: MIT License
+- **Windows Presentation Foundation (WPF)**: MIT License
+
+詳細なライセンス情報は`Licenses/THIRD_PARTY_LICENSES.txt`ファイルを参照してください。
 
 ## 🤝 貢献
 

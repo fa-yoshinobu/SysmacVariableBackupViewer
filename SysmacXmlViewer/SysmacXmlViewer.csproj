@@ -8,9 +8,13 @@
     <AssemblyName>SysmacVariableBackupViewer</AssemblyName>
     <RootNamespace>SysmacVariableBackupViewer</RootNamespace>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <Version>1.0.1</Version>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
+    <Company>SysmacVariableBackupViewer</Company>
+    <Product>SysmacVariableBackupViewer</Product>
+    <Description>Sysmac Studio XML Variable Backup Viewer</Description>
+    <Copyright>Copyright © 2025</Copyright>
 
     
     <!-- 単一ファイル設定 -->
@@ -61,6 +65,12 @@
   <!-- アイコンファイル -->
   <ItemGroup>
     <Content Include="app.ico" />
+  </ItemGroup>
+  
+  <!-- ライセンスファイル -->
+  <ItemGroup>
+    <Content Include="LICENSE.txt" />
+    <Content Include="Licenses\THIRD_PARTY_LICENSES.txt" />
   </ItemGroup>
   
 

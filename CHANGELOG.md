@@ -1,5 +1,36 @@
 # 変更履歴 (CHANGELOG)
 
+## [1.02] - 2025-08-10
+
+### 追加
+- Aboutウィンドウ機能を追加
+  - アプリケーション情報表示（バージョン、ビルド日時、システム情報）
+  - ライブラリ情報表示（依存関係、バージョン、ライセンス）
+  - ライセンス条項表示（アプリケーションライセンス、サードパーティライセンス）
+- メニューバー機能を追加
+  - Fileメニュー（Load File、Export CSV、Exit）
+  - Helpメニュー（About）
+- ライセンスファイルを追加
+  - LICENSE.txt（アプリケーションライセンス）
+  - THIRD_PARTY_LICENSES.txt（サードパーティライセンス）
+
+### 変更
+- プロジェクトファイルにアセンブリ情報を追加
+  - Company、Product、Description、Copyright情報を設定
+- メインウィンドウにメニューバーを追加
+- AboutViewModelで詳細なシステム情報を取得・表示
+
+### 修正
+- UI重複問題を修正（メニューバーとコンテンツの重複を解消）
+- AboutViewModelでFileVersionInfo取得時の例外処理を追加
+- Grid.Row定義を正しく調整
+- メインウィンドウから重複するバージョン表示を削除（Aboutウィンドウで表示されるため）
+
+### 技術仕様
+- AboutWindow.xaml/.cs（AboutウィンドウUI）
+- AboutViewModel.cs（Aboutウィンドウ用ビューモデル）
+- LibraryInfo.cs（ライブラリ情報モデル）
+
 ## [1.01] - 2025-08-08
 
 ### 追加

@@ -76,5 +76,17 @@ namespace SysmacXmlViewer.Views
             }
             return null;
         }
+
+        private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var aboutWindow = new AboutWindow();
+            aboutWindow.Owner = this;
+            aboutWindow.ShowDialog();
+        }
+
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 } 
