@@ -50,7 +50,7 @@ SysmacVariableBackupViewer is a Windows desktop application for viewing and anal
 | Column | Description |
 |--------|-------------|
 | Variable Name | Variable name with hierarchical structure |
-| Data Type | Data type (STRING[] types unified as STRING) |
+| Data Type | Data type |
 | Value | Original value from XML |
 | Converted Value | Human-readable converted value |
 | Offset | Memory offset |
@@ -153,7 +153,7 @@ SysmacVariableBackupViewerは、Sysmac StudioのXMLバックアップファイ�
 | 列名 | 説明 |
 |------|------|
 | Variable Name | 階層構造を含む変数名 |
-| Data Type | データ型（STRING[]型はSTRINGに統一表示） |
+| Data Type | データ型|
 | Value | XMLから読み込んだ元の値 |
 | Converted Value | 人間が読みやすい変換後の値 |
 | Offset | メモリオフセット |
