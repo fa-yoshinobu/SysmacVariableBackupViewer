@@ -26,7 +26,7 @@ SysmacVariableBackupViewer is a Windows desktop application for viewing and anal
 
 - **Basic Types**: BOOL, WORD, UINT, INT
 - **Floating Point**: REAL, LREAL
-- **String Types**: STRING, STRING[]
+- **String Types**: STRING, STRING
 - **Date/Time**: DATE_AND_TIME, TIME, DATE, TIME_OF_DAY
 
 ### System Requirements
@@ -129,7 +129,7 @@ SysmacVariableBackupViewerは、Sysmac StudioのXMLバックアップファイ�
 
 - **基本型**: BOOL, WORD, UINT, INT
 - **浮動小数点**: REAL, LREAL
-- **文字列型**: STRING, STRING[]
+- **文字列型**: STRING, STRING
 - **日時型**: DATE_AND_TIME, TIME, DATE, TIME_OF_DAY
 
 ### システム要件
