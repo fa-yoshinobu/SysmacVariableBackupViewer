@@ -22,6 +22,8 @@ namespace SysmacXmlViewer.ViewModels
         public string CodePagesLicense { get; }
         public string DotNetLicense { get; }
         public string ApplicationLicense { get; }
+        public string Author { get; }
+        public string GitHubUrl { get; }
 
         public AboutViewModel()
         {
@@ -81,6 +83,10 @@ namespace SysmacXmlViewer.ViewModels
                     Description = "UI framework for Windows desktop applications"
                 }
             };
+            
+            // 作者情報を設定
+            Author = "fa-yoshinobu";
+            GitHubUrl = "https://github.com/fa-yoshinobu/SysmacVariableBackupViewer";
             
             // ライセンス情報を設定
             CodePagesLicense = GetCodePagesLicense();

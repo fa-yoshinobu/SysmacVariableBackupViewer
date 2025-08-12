@@ -31,7 +31,25 @@
             <TextBlock Text="© 2025 All rights reserved." 
                        FontSize="10" 
                        HorizontalAlignment="Center" 
-                       Foreground="#888888"/>
+                       Foreground="#888888" Margin="0,0,0,5"/>
+            <TextBlock Text="Author: fa-yoshinobu" 
+                       FontSize="10" 
+                       HorizontalAlignment="Center" 
+                       Foreground="#888888" Margin="0,0,0,5"/>
+            <TextBlock Text="GitHub: " 
+                       FontSize="10" 
+                       HorizontalAlignment="Center" 
+                       Foreground="#888888" Margin="0,0,0,0">
+                <TextBlock.Inlines>
+                    <Run Text="GitHub: " Foreground="#888888"/>
+                    <Hyperlink NavigateUri="{Binding GitHubUrl}" 
+                               RequestNavigate="Hyperlink_RequestNavigate"
+                               Foreground="#0066CC" 
+                               TextDecorations="Underline">
+                        <Run Text="{Binding GitHubUrl}"/>
+                    </Hyperlink>
+                </TextBlock.Inlines>
+            </TextBlock>
         </StackPanel>
         
         <!-- タブコントロール -->
