@@ -20,7 +20,7 @@
                        FontSize="24" FontWeight="Bold" 
                        HorizontalAlignment="Center" 
                        Foreground="#2E2E2E" Margin="0,0,0,10"/>
-            <TextBlock Text="Version 1.0.2" 
+            <TextBlock Text="Version 1.0.3" 
                        FontSize="16" 
                        HorizontalAlignment="Center" 
                        Foreground="#4A4A4A" Margin="0,0,0,5"/>
@@ -36,20 +36,19 @@
                        FontSize="10" 
                        HorizontalAlignment="Center" 
                        Foreground="#888888" Margin="0,0,0,5"/>
-            <TextBlock Text="GitHub: " 
-                       FontSize="10" 
-                       HorizontalAlignment="Center" 
-                       Foreground="#888888" Margin="0,0,0,0">
-                <TextBlock.Inlines>
-                    <Run Text="GitHub: " Foreground="#888888"/>
-                    <Hyperlink NavigateUri="{Binding GitHubUrl}" 
-                               RequestNavigate="Hyperlink_RequestNavigate"
-                               Foreground="#0066CC" 
-                               TextDecorations="Underline">
-                        <Run Text="{Binding GitHubUrl}"/>
-                    </Hyperlink>
-                </TextBlock.Inlines>
-            </TextBlock>
+                         <TextBlock FontSize="10" 
+                        HorizontalAlignment="Center" 
+                        Foreground="#888888" Margin="0,0,0,0">
+                 <TextBlock.Inlines>
+                     <Run Text="GitHub: " Foreground="#888888"/>
+                     <Hyperlink NavigateUri="{Binding GitHubUrl, Mode=OneWay}" 
+                                RequestNavigate="Hyperlink_RequestNavigate"
+                                Foreground="#0066CC" 
+                                TextDecorations="Underline">
+                         <Run Text="{Binding GitHubUrl, Mode=OneWay}"/>
+                     </Hyperlink>
+                 </TextBlock.Inlines>
+             </TextBlock>
         </StackPanel>
         
         <!-- タブコントロール -->

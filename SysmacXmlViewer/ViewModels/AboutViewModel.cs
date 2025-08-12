@@ -27,71 +27,107 @@ namespace SysmacXmlViewer.ViewModels
 
         public AboutViewModel()
         {
-            // システム情報を取得
-            RuntimeVersion = Environment.Version.ToString();
-            OSVersion = Environment.OSVersion.ToString();
-            Architecture = RuntimeInformation.ProcessArchitecture.ToString();
-            
-            // アセンブリ情報を取得
-            var assembly = Assembly.GetExecutingAssembly();
-            var version = assembly.GetName().Version;
-            AssemblyVersion = version?.ToString() ?? "Unknown";
-            
-            // より詳細なアセンブリ情報を取得
+            // デフォルト値を設定
+            RuntimeVersion = "Unknown";
+            OSVersion = "Unknown";
+            Architecture = "Unknown";
+            AssemblyVersion = "Unknown";
+            ProductName = "SysmacVariableBackupViewer";
+            ProductVersion = "1.0.3";
+            CompanyName = "SysmacVariableBackupViewer";
+            Copyright = "Copyright © 2025";
+            BuildDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            Libraries = new List<LibraryInfo>();
+            Author = "fa-yoshinobu";
+            GitHubUrl = "https://github.com/fa-yoshinobu/SysmacVariableBackupViewer";
+            CodePagesLicense = "License information unavailable";
+            DotNetLicense = "License information unavailable";
+            ApplicationLicense = "License information unavailable";
+
+            // システム情報を安全に取得
             try
             {
+                RuntimeVersion = Environment.Version.ToString();
+            }
+            catch { }
+
+            try
+            {
+                OSVersion = Environment.OSVersion.ToString();
+            }
+            catch { }
+
+            try
+            {
+                Architecture = RuntimeInformation.ProcessArchitecture.ToString();
+            }
+            catch { }
+
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var version = assembly.GetName().Version;
+                AssemblyVersion = version?.ToString() ?? "Unknown";
+            }
+            catch { }
+
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
                 var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
                 ProductName = fileVersionInfo.ProductName ?? "SysmacVariableBackupViewer";
-                ProductVersion = fileVersionInfo.ProductVersion ?? "1.0.2";
+                ProductVersion = fileVersionInfo.ProductVersion ?? "1.0.3";
                 CompanyName = fileVersionInfo.CompanyName ?? "SysmacVariableBackupViewer";
                 Copyright = fileVersionInfo.LegalCopyright ?? "Copyright © 2025";
             }
-            catch
+            catch { }
+
+            try
             {
-                // ファイルバージョン情報の取得に失敗した場合のフォールバック
-                ProductName = "SysmacVariableBackupViewer";
-                ProductVersion = "1.0.2";
-                CompanyName = "SysmacVariableBackupViewer";
-                Copyright = "Copyright © 2025";
+                Libraries = new List<LibraryInfo>
+                {
+                    new LibraryInfo
+                    {
+                        Name = "System.Text.Encoding.CodePages",
+                        Version = "7.0.0",
+                        License = "MIT",
+                        Description = "Provides encoding support for various code pages"
+                    },
+                    new LibraryInfo
+                    {
+                        Name = ".NET 6.0 Runtime",
+                        Version = "6.0.0",
+                        License = "MIT",
+                        Description = "Microsoft .NET Framework runtime"
+                    },
+                    new LibraryInfo
+                    {
+                        Name = "Windows Presentation Foundation (WPF)",
+                        Version = "6.0.0",
+                        License = "MIT",
+                        Description = "UI framework for Windows desktop applications"
+                    }
+                };
             }
-            
-            // ビルド日時を取得（実際のビルド日時は別途設定が必要）
-            BuildDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            
-            // ライブラリ情報を設定
-            Libraries = new List<LibraryInfo>
+            catch { }
+
+            try
             {
-                new LibraryInfo
-                {
-                    Name = "System.Text.Encoding.CodePages",
-                    Version = "7.0.0",
-                    License = "MIT",
-                    Description = "Provides encoding support for various code pages"
-                },
-                new LibraryInfo
-                {
-                    Name = ".NET 6.0 Runtime",
-                    Version = "6.0.0",
-                    License = "MIT",
-                    Description = "Microsoft .NET Framework runtime"
-                },
-                new LibraryInfo
-                {
-                    Name = "Windows Presentation Foundation (WPF)",
-                    Version = "6.0.0",
-                    License = "MIT",
-                    Description = "UI framework for Windows desktop applications"
-                }
-            };
-            
-            // 作者情報を設定
-            Author = "fa-yoshinobu";
-            GitHubUrl = "https://github.com/fa-yoshinobu/SysmacVariableBackupViewer";
-            
-            // ライセンス情報を設定
-            CodePagesLicense = GetCodePagesLicense();
-            DotNetLicense = GetDotNetLicense();
-            ApplicationLicense = GetApplicationLicense();
+                CodePagesLicense = GetCodePagesLicense();
+            }
+            catch { }
+
+            try
+            {
+                DotNetLicense = GetDotNetLicense();
+            }
+            catch { }
+
+            try
+            {
+                ApplicationLicense = GetApplicationLicense();
+            }
+            catch { }
         }
 
         private string GetCodePagesLicense()
@@ -167,7 +203,7 @@ agreements.
 
 For technical support or licensing inquiries, please contact the developer.
 
-Version: 1.0.2
+Version: 1.0.3
 Build Date: " + BuildDate + @"
 
 Features:

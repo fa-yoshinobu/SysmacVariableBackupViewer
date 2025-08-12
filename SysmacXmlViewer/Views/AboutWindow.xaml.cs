@@ -12,8 +12,17 @@ namespace SysmacXmlViewer.Views
     {
         public AboutWindow()
         {
-            InitializeComponent();
-            DataContext = new AboutViewModel();
+            try
+            {
+                InitializeComponent();
+                DataContext = new AboutViewModel();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to initialize About window: {ex.Message}", "Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                Close();
+            }
         }
 
         private void OkButton_Click(object sender, RoutedEventArgs e)

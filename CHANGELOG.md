@@ -1,5 +1,23 @@
 # 変更履歴 (CHANGELOG)
 
+## [1.0.3] - 2025-01-27
+
+### 追加
+- Aboutウィンドウに作者情報を追加
+  - 作者名: fa-yoshinobu
+  - GitHubリンク: https://github.com/fa-yoshinobu/SysmacVariableBackupViewer
+- クリック可能なGitHubリンク機能を追加
+  - デフォルトブラウザでGitHubページを開く
+  - エラーハンドリング機能を実装
+
+### 変更
+- バージョンを1.0.3に更新
+- AboutウィンドウのUIを改善（作者情報とGitHubリンクの追加）
+
+### 修正
+- Aboutウィンドウの表示内容を英語で統一
+- ハイパーリンクのクリック処理を最適化
+
 ## [1.02] - 2025-08-10
 
 ### 追加

@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -79,9 +80,17 @@ namespace SysmacXmlViewer.Views
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var aboutWindow = new AboutWindow();
-            aboutWindow.Owner = this;
-            aboutWindow.ShowDialog();
+            try
+            {
+                var aboutWindow = new AboutWindow();
+                aboutWindow.Owner = this;
+                aboutWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to open About window: {ex.Message}", "Error", 
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ExitMenuItem_Click(object sender, RoutedEventArgs e)
