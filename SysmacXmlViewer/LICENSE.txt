@@ -17,7 +17,7 @@ agreements.
 
 For technical support or licensing inquiries, please contact the developer.
 
-Version: 1.0.2
+Version: 1.0.3
 
 Features:
 - XML backup file parsing and viewing

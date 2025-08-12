@@ -19,11 +19,7 @@ namespace SysmacXmlViewer.Services
             if (string.IsNullOrEmpty(rawValue))
                 return string.Empty;
 
-            // デバッグ用: キャッシュをクリア
-            if (dataType.ToUpperInvariant() == "DATE_AND_TIME" || dataType.ToUpperInvariant() == "DATE")
-            {
-                ClearCache();
-            }
+
 
             // キャッシュキーを作成
             string cacheKey = $"{dataType}_{rawValue}";
