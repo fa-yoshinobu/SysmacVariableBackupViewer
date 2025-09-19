@@ -45,10 +45,11 @@ namespace SysmacXmlViewer.Services
             return new XElement("Body",
                 new XElement("RetainVariable",
                     variables.Select(v => new XElement("Item",
-                        new XAttribute("Name", v.Name),
-                        new XAttribute("DataType", v.DataType),
-                        !string.IsNullOrEmpty(v.Offset) ? new XAttribute("Offset", v.Offset) : null,
-                        new XElement("Data", DataTypeConverter.ConvertStringToDataTypeValue(v.DataType, v.Value))
+                    new XAttribute("Name", v.Name),
+                    new XAttribute("DataType", v.DataType),
+                    !string.IsNullOrEmpty(v.Offset) ? new XAttribute("Offset", v.Offset) : null,
+                    // 解析済みの生値をそのまま保存（表示値→生値の再変換は行わない）
+                    new XElement("Data", v.Value)
                     ))
                 )
             );

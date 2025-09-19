@@ -33,7 +33,7 @@ namespace SysmacXmlViewer.ViewModels
             Architecture = "Unknown";
             AssemblyVersion = "Unknown";
             ProductName = "SysmacVariableBackupViewer";
-            ProductVersion = "1.0.3";
+            ProductVersion = "1.0.4";
             CompanyName = "SysmacVariableBackupViewer";
             Copyright = "Copyright © 2025";
             BuildDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
@@ -76,7 +76,7 @@ namespace SysmacXmlViewer.ViewModels
                 var assembly = Assembly.GetExecutingAssembly();
                 var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
                 ProductName = fileVersionInfo.ProductName ?? "SysmacVariableBackupViewer";
-                ProductVersion = fileVersionInfo.ProductVersion ?? "1.0.3";
+                ProductVersion = fileVersionInfo.ProductVersion ?? "1.0.4";
                 CompanyName = fileVersionInfo.CompanyName ?? "SysmacVariableBackupViewer";
                 Copyright = fileVersionInfo.LegalCopyright ?? "Copyright © 2025";
             }
@@ -203,7 +203,7 @@ agreements.
 
 For technical support or licensing inquiries, please contact the developer.
 
-Version: 1.0.3
+Version: 1.0.4
 Build Date: " + BuildDate + @"
 
 Features:

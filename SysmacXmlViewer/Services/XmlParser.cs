@@ -63,8 +63,8 @@ namespace SysmacXmlViewer.Services
                 throw new InvalidOperationException("Project要素が見つかりません。");
             }
 
-            return new ProjectInfo
-            {
+                return new ProjectInfo
+                {
                 Id = project.Attribute("ID")?.Value ?? string.Empty,
                 Name = project.Attribute("Name")?.Value ?? string.Empty,
                 Tracking = project.Attribute("Tracking")?.Value ?? string.Empty,
@@ -72,8 +72,10 @@ namespace SysmacXmlViewer.Services
                 DeviceModelFull = project.Element("DeviceModelFull")?.Value ?? string.Empty,
                 UnitVersion = project.Element("UnitVersion")?.Value ?? string.Empty,
                 Version = header.Element("Version")?.Value ?? string.Empty,
-                EnableOffset = bool.Parse(header.Element("EnableOffset")?.Value ?? "False")
-            };
+                EnableOffset = bool.TryParse(header.Element("EnableOffset")?.Value, out var enable)
+                    ? enable
+                    : false
+                };
         }
         
         private VariableItem ParseVariableItem(XElement item)
@@ -88,9 +90,37 @@ namespace SysmacXmlViewer.Services
                 DataType = dataType,
                 Offset = item.Attribute("Offset")?.Value ?? string.Empty,
                 Value = rawValue, // 元の値をそのまま設定
-                DisplayName = ExtractDisplayName(name),
-                GroupName = ExtractGroupName(name)
+                DisplayName = NormalizeDisplayPath(name),
+                GroupName = GetGroupNameFromDisplayPath(NormalizeDisplayPath(name))
             };
+        }
+
+        // 表示用パスの正規化: 先頭の "VAR:/" や "VAR://<seg>/" を除去し、重複スラッシュを整理
+        private string NormalizeDisplayPath(string fullName)
+        {
+            if (string.IsNullOrEmpty(fullName)) return string.Empty;
+
+            string s = fullName;
+            if (s.StartsWith("VAR://", StringComparison.OrdinalIgnoreCase))
+            {
+                // Keep GUID (program name) after VAR://
+                s = s.Substring("VAR://".Length);
+            }
+            else if (s.StartsWith("VAR:/", StringComparison.OrdinalIgnoreCase))
+            {
+                s = s.Substring("VAR:/".Length);
+            }
+
+            var parts = s.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            return string.Join("/", parts);
+        }
+
+        // 表示用パスからグループ名（最初のセグメント）を抽出
+        private string GetGroupNameFromDisplayPath(string displayPath)
+        {
+            if (string.IsNullOrEmpty(displayPath)) return string.Empty;
+            var idx = displayPath.IndexOf('/');
+            return idx > 0 ? displayPath.Substring(0, idx) : displayPath;
         }
         
         private string ExtractDisplayName(string fullName)

@@ -128,16 +128,16 @@ namespace SysmacXmlViewer.Services
                 if (long.TryParse(rawValue, out long nanoseconds))
                 {
                     // ナノ秒を秒に変換
-                    long seconds = nanoseconds / 1_000_000_000;
+                    long ticks = nanoseconds / 100;
                     
                     // Sysmac Studioの基準日時: 1970年1月1日 00:00:00 (Unix時間)
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     
                     // 基準日時からの経過秒数として解釈
-                    DateTime dateTime = baseDateTime.AddSeconds(seconds);
+                    DateTime dateTime = baseDateTime.AddTicks(ticks);
                     
                     // DATE_AND_TIME形式: yyyy-MM-dd-HH:mm:ss.ff
-                    return dateTime.ToString("yyyy-MM-dd-HH:mm:ss.ff");
+                    return dateTime.ToString("yyyy-MM-dd-HH:mm:ss.ff", CultureInfo.InvariantCulture);
                 }
                 
                 // 変換できない場合は元の値を返す
@@ -156,16 +156,16 @@ namespace SysmacXmlViewer.Services
                 if (long.TryParse(rawValue, out long nanoseconds))
                 {
                     // ナノ秒を秒に変換
-                    long seconds = nanoseconds / 1_000_000_000;
+                    long ticks = nanoseconds / 100;
                     
                     // Sysmac Studioの基準日時: 1970年1月1日 00:00:00 (Unix時間)
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     
                     // 基準日時からの経過秒数として解釈
-                    DateTime dateTime = baseDateTime.AddSeconds(seconds);
+                    DateTime dateTime = baseDateTime.AddTicks(ticks);
                     
                     // DATE形式: yyyy-MM-dd
-                    return dateTime.ToString("yyyy-MM-dd");
+                    return dateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                 }
                 return rawValue;
             }
@@ -278,9 +278,9 @@ namespace SysmacXmlViewer.Services
                     int hours = (int)(totalSeconds / 3600);
                     int minutes = (int)((totalSeconds % 3600) / 60);
                     int seconds = (int)(totalSeconds % 60);
-                    int milliseconds = (int)((totalSeconds * 1000) % 1000);
+                    int centiseconds = (int)((totalSeconds * 100) % 100);
                     
-                    return $"{hours:D2}:{minutes:D2}:{seconds:D2}.{milliseconds:D2}";
+                    return $"{hours:D2}:{minutes:D2}:{seconds:D2}.{centiseconds:D2}";
                 }
                 return rawValue;
             }
@@ -415,17 +415,15 @@ namespace SysmacXmlViewer.Services
             {
                 // YYYY-MM-dd-HH:mm:ss.ff 形式の文字列をDATE_AND_TIME形式に変換
                 if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd-HH:mm:ss.ff", 
-                    CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+                    CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out DateTime dateTime))
                 {
                     // 基準日時: 1970年1月1日 00:00:00
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     
                     // 経過秒数を計算
-                    TimeSpan timeSpan = dateTime - baseDateTime;
-                    long seconds = (long)timeSpan.TotalSeconds;
-                    long nanoseconds = seconds * 1_000_000_000;
-                    
-                    return nanoseconds.ToString();
+                    long ticks = (dateTime - baseDateTime).Ticks;
+                    long nanoseconds = ticks * 100;
+                    return nanoseconds.ToString(CultureInfo.InvariantCulture);
                 }
                 
                 return displayValue;
@@ -535,17 +533,15 @@ namespace SysmacXmlViewer.Services
             {
                 // "yyyy-MM-dd" 形式の文字列をナノ秒に変換
                 if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd", 
-                    CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateTime))
+                    CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out DateTime parsedDateTime))
                 {
                     // 基準日時: 1970年1月1日 00:00:00
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     
                     // 経過秒数を計算
-                    TimeSpan timeSpan = parsedDateTime - baseDateTime;
-                    long seconds = (long)timeSpan.TotalSeconds;
-                    long nanoseconds = seconds * 1_000_000_000;
-                    
-                    return nanoseconds.ToString();
+                    long ticks = (parsedDateTime - baseDateTime).Ticks;
+                    long nanoseconds = ticks * 100;
+                    return nanoseconds.ToString(CultureInfo.InvariantCulture);
                 }
                 return displayValue;
             }
@@ -674,8 +670,8 @@ namespace SysmacXmlViewer.Services
                 if (long.TryParse(value, out long nanoseconds))
                 {
                     // 妥当な範囲かチェック（負の値も含む）
-                    long absNanoseconds = Math.Abs(nanoseconds);
-                    return absNanoseconds <= 86_400_000_000_000L;
+                    // 継続時間として扱うため、long範囲であれば許容
+                    return true;
                 }
                 
                 // 文字列形式の場合（-106751d23h47m16s854.775ms）
@@ -809,7 +805,8 @@ namespace SysmacXmlViewer.Services
             }
 
             // 16進数文字列かどうかを判定
-            bool result = !string.IsNullOrEmpty(value) && 
+            bool result = !string.IsNullOrEmpty(value) &&
+                         (value.Length % 2 == 0) &&
                          value.All(c => char.IsDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
             
             // キャッシュに保存
@@ -831,8 +828,19 @@ namespace SysmacXmlViewer.Services
         {
             try
             {
+                // Little Endian fast-path: interpret as-is (Windows is little-endian)
+                if (IsHexString(rawValue) && rawValue.Length == 8)
+                {
+                    var bytesLE = ConvertHexToBytes(rawValue);
+                    if (!BitConverter.IsLittleEndian) Array.Reverse(bytesLE);
+                    if (bytesLE.Length >= 4)
+                    {
+                        float v = BitConverter.ToSingle(bytesLE, 0);
+                        return v.ToString("F6", CultureInfo.InvariantCulture);
+                    }
+                }
                 // まず、16進数文字列として解析を試行
-                if (IsHexString(rawValue))
+                if (IsHexString(rawValue) && rawValue.Length == 8)
                 {
                     // 16進数文字列を正しい順序に並び替える
                     string correctedHex = rawValue;
@@ -847,10 +855,7 @@ namespace SysmacXmlViewer.Services
                     byte[] bytes = ConvertHexToBytes(correctedHex);
                     
                     // ビッグエンディアンからリトルエンディアンに変換
-                    if (bytes.Length >= 4 && BitConverter.IsLittleEndian)
-                    {
-                        Array.Reverse(bytes);
-                    }
+                    // correctedHexでエンディアン補正済みのため、ここでの反転は不要
                     
                     // 4バイト（32ビット）のREAL型として処理
                     if (bytes.Length >= 4)
@@ -879,8 +884,19 @@ namespace SysmacXmlViewer.Services
         {
             try
             {
+                // Little Endian fast-path: interpret as-is (Windows is little-endian)
+                if (IsHexString(rawValue) && rawValue.Length == 16)
+                {
+                    var bytesLE = ConvertHexToBytes(rawValue);
+                    if (!BitConverter.IsLittleEndian) Array.Reverse(bytesLE);
+                    if (bytesLE.Length >= 8)
+                    {
+                        double v = BitConverter.ToDouble(bytesLE, 0);
+                        return v.ToString("F6", CultureInfo.InvariantCulture);
+                    }
+                }
                 // まず、16進数文字列として解析を試行
-                if (IsHexString(rawValue))
+                if (IsHexString(rawValue) && rawValue.Length == 16)
                 {
                     // 16進数文字列を正しい順序に並び替える
                     string correctedHex = rawValue;
@@ -897,10 +913,7 @@ namespace SysmacXmlViewer.Services
                     byte[] bytes = ConvertHexToBytes(correctedHex);
                     
                     // ビッグエンディアンからリトルエンディアンに変換
-                    if (bytes.Length >= 8 && BitConverter.IsLittleEndian)
-                    {
-                        Array.Reverse(bytes);
-                    }
+                    // correctedHexでエンディアン補正済みのため、ここでの反転は不要
                     
                     // 8バイト（64ビット）のLREAL型として処理
                     if (bytes.Length >= 8)

@@ -1,6 +1,99 @@
-# 変更履歴 (CHANGELOG)
+# 更新履歴 (CHANGELOG)
 
-## [1.0.3] - 2025-01-27
+## [1.0.4]
+
+### 修正
+- フィルタ再実行の調停ロジックを導入し、連続入力時でも常に最新条件で変数一覧が更新されるように修正
+# 更新履歴
+
+このコミットでは、潜在的な不具合の修正と精度・安全性の向上を目的として、数値/日時の変換、CSV 出力、XML の読み書き、UI 更新のスレッド安全性に関する修正を行いました。
+
+## 変更概要
+
+- 浮動小数点（REAL/LREAL）の16進→数値変換時のエンディアン処理と判定条件を是正
+- 日付/時刻（DATE_AND_TIME/DATE/TIME_OF_DAY）の相互変換で小数部の精度と表記の一貫性を確保
+- TIME の妥当性チェックを緩和（継続時間として日数上限を撤廃）
+- CSV 出力でフィールドのエスケープ（ダブルクォート）を実装
+- XML 保存時に表示値→生値の再変換を行わず元の生値を書き戻すよう修正
+- `EnableOffset` の解析を `TryParse` 化し例外リスクを排除
+- データ型フィルタ（`AvailableDataTypes`）を `ObservableCollection` 化し、UI スレッドで安全に更新
+
+## 影響ファイル
+
+- `SysmacXmlViewer/Services/DataTypeConverter.cs`
+- `SysmacXmlViewer/Services/CsvExporter.cs`
+- `SysmacXmlViewer/Services/XmlWriter.cs`
+- `SysmacXmlViewer/Services/XmlParser.cs`
+- `SysmacXmlViewer/ViewModels/MainViewModel.cs`
+
+## 変更詳細
+
+### DataTypeConverter
+
+- 16進判定を厳密化
+  - 偶数桁のみを16進として許可（バイト境界でない文字列を除外）。
+  - 該当箇所: `IsHexString()`
+
+- REAL/LREAL の 16進→浮動小数点変換
+  - 16進扱いは REAL=8 桁（4B）、LREAL=16 桁（8B）の場合に限定。
+  - 既存のペア順入替（ビッグ→リトル補正）に加えた二重の `Array.Reverse` を除去し、反転の重複を解消。
+  - 表示は `InvariantCulture` で `F6` 固定。
+
+- DATE_AND_TIME/DATE（数値→表示）
+  - ナノ秒値を tick（100ns）に換算して `AddTicks()` を使用。丸めによる小数秒欠落を防止。
+  - フォーマットは `yyyy-MM-dd-HH:mm:ss.ff`（ff=1/100秒）、`yyyy-MM-dd`。`InvariantCulture` を使用。
+
+- DATE_AND_TIME/DATE（表示→数値）
+  - `DateTimeStyles.AssumeUniversal | AdjustToUniversal` を使用し UTC として解釈。
+  - 差分 tick をナノ秒（tick×100）に変換して復元。
+
+- TIME_OF_DAY（数値↔表示）
+  - 表示の小数部を ff（1/100秒）へ統一（以前の 2 桁 ms 表記を廃止）。
+
+- TIME の妥当性
+  - 継続時間として扱うため 24h 上限チェックを撤廃（数値形式は long 範囲内を許容）。
+
+### CsvExporter
+
+- すべてのフィールドを CSV エスケープ（`"` → `""`）してから二重引用符で囲むよう変更。
+- 影響箇所: `ExportToCsv()` に `EscapeCsv()` を追加し適用。
+
+### XmlWriter
+
+- 変数値の書き戻しで、表示値→生値の再変換を行わず、解析済みの生値（`v.Value`）をそのまま保存するよう修正。
+  - REAL/LREAL/日時などの再変換による破損リスクを排除。
+
+### XmlParser
+
+- `EnableOffset` を `bool.TryParse` に変更し、空/0/1/その他値でも例外が出ないように安全化。
+
+### MainViewModel
+
+- データ型フィルタ `AvailableDataTypes` を `List<string>` から `ObservableCollection<string>` に変更。
+- 別スレッドで種類を収集し、UI スレッド（Dispatcher）で `Clear()` と `Add()` を実施するように修正。
+  - ComboBox に即時反映、クロススレッド例外の回避。
+
+## 互換性/注意点
+
+- TIME_OF_DAY の表示小数部が ff（1/100 秒）に統一されました。従来の 2 桁ミリ秒相当表示からの差異に注意してください。
+- REAL/LREAL の 16進解釈は桁数で厳密化されました（8/16 桁以外は十進数として解釈）。
+- XML 保存時に表示値を保存していた前提の外部ツール連携がある場合、`v.Value`（生値）保存への変更影響をご確認ください。
+
+## 動作確認の目安
+
+1. サンプル XML を読み込み、以下を確認
+   - `DATE_AND_TIME` の `.ff` が 00 固定にならず小数部が表示される
+   - `TIME_OF_DAY` が `HH:mm:ss.ff` で表示される
+   - REAL/LREAL の 16進（8/16 桁）値が正しい 10 進表示になる
+2. CSV エクスポート
+   - カンマ/改行/ダブルクォートを含む値が適切にエスケープされている
+3. XML 保存
+   - 保存した XML の `<Data>` が表示値ではなく生値のままである（REAL 等が小数テキスト化されない）
+4. UI
+   - データ型コンボボックスがファイル読み込み直後に正しく更新される（例外なし）
+
+
+## [1.0.3]
 
 ### 追加
 - Aboutウィンドウに作者情報を追加
@@ -18,7 +111,7 @@
 - Aboutウィンドウの表示内容を英語で統一
 - ハイパーリンクのクリック処理を最適化
 
-## [1.02] - 2025-08-10
+## [1.02]
 
 ### 追加
 - Aboutウィンドウ機能を追加
@@ -49,7 +142,7 @@
 - AboutViewModel.cs（Aboutウィンドウ用ビューモデル）
 - LibraryInfo.cs（ライブラリ情報モデル）
 
-## [1.01] - 2025-08-08
+## [1.01]
 
 ### 追加
 - デバッグ用キャッシュクリア機能を追加
@@ -64,7 +157,7 @@
 - 日時データの変換精度を向上
 - キャッシュ機能の安定性を改善
 
-## [1.00] - 2025-08-08
+## [1.00]
 
 ### 追加
 - Sysmac Studio XMLバックアップファイルの読み込み機能

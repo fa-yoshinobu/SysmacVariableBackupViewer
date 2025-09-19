@@ -30,6 +30,8 @@ namespace SysmacXmlViewer.ViewModels
         // 高速化のためのキャッシュ
         private Dictionary<string, string> _dataTypeCache = new();
         private List<VariableItem> _cachedFilteredList = new();
+        private readonly object _filterLock = new();
+        private bool _pendingFilterRequest = false;
         private bool _isFiltering = false;
 
         public MainViewModel()
@@ -42,7 +44,7 @@ namespace SysmacXmlViewer.ViewModels
             ExportCsvCommand = new RelayCommand(ExportCsv);
             ClearFiltersCommand = new RelayCommand(ClearFilters);
             
-            AvailableDataTypes = new List<string>();
+            AvailableDataTypes = new ObservableCollection<string>();
             AvailableDataTypes.Add("All");
         }
 
@@ -60,7 +62,7 @@ namespace SysmacXmlViewer.ViewModels
                 if (SetProperty(ref _filterText, value))
                 {
                     // 非同期でフィルタリングを実行
-                    _ = Task.Run(() => ApplyFiltersAsync());
+                    _ = ApplyFiltersAsync();
                 }
             }
         }
@@ -73,7 +75,7 @@ namespace SysmacXmlViewer.ViewModels
                 if (SetProperty(ref _selectedDataType, value))
                 {
                     // 非同期でフィルタリングを実行
-                    _ = Task.Run(() => ApplyFiltersAsync());
+                    _ = ApplyFiltersAsync();
                 }
             }
         }
@@ -90,7 +92,7 @@ namespace SysmacXmlViewer.ViewModels
             set => SetProperty(ref _projectInfo, value);
         }
 
-        public List<string> AvailableDataTypes { get; }
+        public ObservableCollection<string> AvailableDataTypes { get; }
 
         public int TotalVariables => _allVariables.Count;
         public int FilteredVariablesCount => FilteredVariables.Count;
@@ -147,6 +149,12 @@ namespace SysmacXmlViewer.ViewModels
             _dataTypeCache.Clear();
             _cachedFilteredList.Clear();
             
+            lock (_filterLock)
+            {
+                _pendingFilterRequest = false;
+                _isFiltering = false;
+            }
+            
             // ガベージコレクションを強制実行
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -154,18 +162,22 @@ namespace SysmacXmlViewer.ViewModels
 
         private async Task UpdateAvailableDataTypesAsync(XmlBackupData data)
         {
-            await Task.Run(() =>
-            {
-                AvailableDataTypes.Clear();
-                AvailableDataTypes.Add("All");
-                
-                var dataTypes = data.VariablesByType.Keys
+            var dataTypes = await Task.Run(() =>
+                data.VariablesByType.Keys
                     .Select(NormalizeDataType)
                     .Distinct()
                     .OrderBy(x => x)
-                    .ToList();
-                
-                AvailableDataTypes.AddRange(dataTypes);
+                    .ToList()
+            );
+
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                AvailableDataTypes.Clear();
+                AvailableDataTypes.Add("All");
+                foreach (var dt in dataTypes)
+                {
+                    AvailableDataTypes.Add(dt);
+                }
             });
         }
 
@@ -232,15 +244,35 @@ namespace SysmacXmlViewer.ViewModels
 
         private async Task ApplyFiltersAsync()
         {
-            if (_isFiltering) return;
-            
-            _isFiltering = true;
-            
-            try
+            lock (_filterLock)
             {
-                var filtered = await Task.Run(() => ApplyFiltersInternal());
-                
-                // UI更新をバッチで実行
+                if (_isFiltering)
+                {
+                    _pendingFilterRequest = true;
+                    return;
+                }
+
+                _isFiltering = true;
+            }
+
+            while (true)
+            {
+                List<VariableItem> filtered;
+
+                try
+                {
+                    filtered = await Task.Run(() => ApplyFiltersInternal());
+                }
+                catch
+                {
+                    lock (_filterLock)
+                    {
+                        _isFiltering = false;
+                        _pendingFilterRequest = false;
+                    }
+                    throw;
+                }
+
                 await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     FilteredVariables.Clear();
@@ -248,14 +280,30 @@ namespace SysmacXmlViewer.ViewModels
                     {
                         FilteredVariables.Add(variable);
                     }
-                    
+
                     OnPropertyChanged(nameof(TotalVariables));
                     OnPropertyChanged(nameof(FilteredVariablesCount));
                 });
-            }
-            finally
-            {
-                _isFiltering = false;
+
+                bool shouldRepeat;
+                lock (_filterLock)
+                {
+                    if (_pendingFilterRequest)
+                    {
+                        _pendingFilterRequest = false;
+                        shouldRepeat = true;
+                    }
+                    else
+                    {
+                        _isFiltering = false;
+                        shouldRepeat = false;
+                    }
+                }
+
+                if (!shouldRepeat)
+                {
+                    break;
+                }
             }
         }
 
