@@ -35,4 +35,4 @@ namespace SysmacXmlViewer.Commands
             _execute(parameter);
         }
     }
-} 
+}

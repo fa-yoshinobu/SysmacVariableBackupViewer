@@ -1,0 +1,92 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          cache: true
+          cache-dependency-path: SysmacXmlViewer/SysmacXmlViewer.csproj
+
+      - name: Resolve version from tag
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$') {
+            throw "Tag must look like v1.2.3 or v1.2.3-rc.1."
+          }
+
+          $version = $Matches.version
+          $fileVersion = (($version -replace '-.*$', '') + ".0")
+
+          "APP_VERSION=$version" >> $env:GITHUB_ENV
+          "FILE_VERSION=$fileVersion" >> $env:GITHUB_ENV
+
+      - name: Restore
+        run: dotnet restore SysmacXmlViewer.sln
+
+      - name: Publish single-file executable
+        run: >
+          dotnet publish SysmacXmlViewer\SysmacXmlViewer.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:PublishSingleFile=true
+          -p:Version=${{ env.APP_VERSION }}
+          -p:AssemblyVersion=${{ env.FILE_VERSION }}
+          -p:FileVersion=${{ env.FILE_VERSION }}
+          -p:InformationalVersion=${{ env.APP_VERSION }}
+          --no-restore
+          -o artifacts\publish
+
+      - name: Prepare release assets
+        shell: pwsh
+        run: |
+          $publishExe = "artifacts/publish/SysmacVariableBackupViewer.exe"
+          if (-not (Test-Path $publishExe)) {
+            throw "Single-file executable was not created: $publishExe"
+          }
+
+          New-Item -ItemType Directory -Path artifacts\release -Force | Out-Null
+
+          $assetName = "SysmacVariableBackupViewer-$env:APP_VERSION-win-x64.exe"
+          $assetPath = Join-Path "artifacts/release" $assetName
+
+          Copy-Item $publishExe $assetPath
+
+          $hash = (Get-FileHash $assetPath -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$hash *$assetName" | Set-Content "$assetPath.sha256"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: SysmacVariableBackupViewer ${{ env.APP_VERSION }}
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: |
+            artifacts\release\SysmacVariableBackupViewer-${{ env.APP_VERSION }}-win-x64.exe
+            artifacts\release\SysmacVariableBackupViewer-${{ env.APP_VERSION }}-win-x64.exe.sha256

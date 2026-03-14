@@ -19,7 +19,7 @@ namespace SysmacXmlViewer.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to initialize About window: {ex.Message}", "Error", 
+                MessageBox.Show($"Failed to initialize About window: {ex.Message}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
             }
@@ -44,7 +44,7 @@ namespace SysmacXmlViewer.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to open URL: {ex.Message}", "Error", 
+                MessageBox.Show($"Failed to open URL: {ex.Message}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

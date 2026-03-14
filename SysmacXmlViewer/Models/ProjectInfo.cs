@@ -100,4 +100,4 @@ namespace SysmacXmlViewer.Models
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
-} 
+}

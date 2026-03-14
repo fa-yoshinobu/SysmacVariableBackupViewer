@@ -15,10 +15,10 @@ namespace SysmacXmlViewer.Services
                     CreateBody(data.Variables)
                 )
             );
-            
+
             doc.Save(filePath);
         }
-        
+
         private XElement CreateHeader(ProjectInfo projectInfo)
         {
             return new XElement("Header",
@@ -39,7 +39,7 @@ namespace SysmacXmlViewer.Services
                 )
             );
         }
-        
+
         private XElement CreateBody(List<VariableItem> variables)
         {
             return new XElement("Body",
@@ -55,4 +55,4 @@ namespace SysmacXmlViewer.Services
             );
         }
     }
-} 
+}

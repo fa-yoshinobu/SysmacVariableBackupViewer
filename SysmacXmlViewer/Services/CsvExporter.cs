@@ -9,10 +9,10 @@ namespace SysmacXmlViewer.Services
         public void ExportToCsv(IEnumerable<VariableItem> variables, string filePath)
         {
             using var writer = new StreamWriter(filePath, false, System.Text.Encoding.UTF8);
-            
+
             // ヘッダー行
             writer.WriteLine("Variable Name,Data Type,Value,Converted Value,Offset,Group Name,Array Index");
-            
+
             // データ行
             foreach (var variable in variables)
             {

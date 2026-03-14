@@ -19,14 +19,14 @@ namespace SysmacXmlViewer.ViewModels
         private readonly XmlParser _xmlParser;
         private readonly CsvExporter _csvExporter;
         private readonly XmlWriter _xmlWriter;
-        
+
         private ObservableCollection<VariableItem> _filteredVariables = new();
         private string _filterText = string.Empty;
         private string _selectedDataType = "All";
         private string _currentFilePath = string.Empty;
         private ProjectInfo _projectInfo = new();
         private List<VariableItem> _allVariables = new();
-        
+
         // 高速化のためのキャッシュ
         private Dictionary<string, string> _dataTypeCache = new();
         private List<VariableItem> _cachedFilteredList = new();
@@ -39,11 +39,11 @@ namespace SysmacXmlViewer.ViewModels
             _xmlParser = new XmlParser();
             _csvExporter = new CsvExporter();
             _xmlWriter = new XmlWriter();
-            
+
             LoadFileCommand = new RelayCommand(LoadFile);
             ExportCsvCommand = new RelayCommand(ExportCsv);
             ClearFiltersCommand = new RelayCommand(ClearFilters);
-            
+
             AvailableDataTypes = new ObservableCollection<string>();
             AvailableDataTypes.Add("All");
         }
@@ -115,10 +115,10 @@ namespace SysmacXmlViewer.ViewModels
                 {
                     // メモリクリア
                     ClearMemory();
-                    
+
                     // 非同期でファイル読み込み
                     var data = await Task.Run(() => _xmlParser.ParseXmlFile(openFileDialog.FileName));
-                    
+
                     _allVariables = data.Variables;
                     ProjectInfo = data.ProjectInfo;
                     CurrentFilePath = openFileDialog.FileName;
@@ -130,7 +130,7 @@ namespace SysmacXmlViewer.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Failed to load file: {ex.Message}", "Error", 
+                    System.Windows.MessageBox.Show($"Failed to load file: {ex.Message}", "Error",
                         System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
             }
@@ -141,20 +141,20 @@ namespace SysmacXmlViewer.ViewModels
             // キャッシュをクリア
             VariableItem.ClearCache();
             Services.DataTypeConverter.ClearCache();
-            
+
             // コレクションをクリア
             _allVariables.Clear();
             FilteredVariables.Clear();
             AvailableDataTypes.Clear();
             _dataTypeCache.Clear();
             _cachedFilteredList.Clear();
-            
+
             lock (_filterLock)
             {
                 _pendingFilterRequest = false;
                 _isFiltering = false;
             }
-            
+
             // ガベージコレクションを強制実行
             GC.Collect();
             GC.WaitForPendingFinalizers();
@@ -208,7 +208,7 @@ namespace SysmacXmlViewer.ViewModels
         {
             if (_allVariables.Count == 0)
             {
-                System.Windows.MessageBox.Show("No data to export.", "Warning", 
+                System.Windows.MessageBox.Show("No data to export.", "Warning",
                     System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
                 return;
             }
@@ -225,12 +225,12 @@ namespace SysmacXmlViewer.ViewModels
                 try
                 {
                     _csvExporter.ExportToCsv(FilteredVariables.ToList(), saveFileDialog.FileName);
-                    System.Windows.MessageBox.Show("CSV file export completed.", "Complete", 
+                    System.Windows.MessageBox.Show("CSV file export completed.", "Complete",
                         System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Failed to export CSV file: {ex.Message}", "Error", 
+                    System.Windows.MessageBox.Show($"Failed to export CSV file: {ex.Message}", "Error",
                         System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
             }
@@ -315,7 +315,7 @@ namespace SysmacXmlViewer.ViewModels
             if (!string.IsNullOrWhiteSpace(FilterText))
             {
                 var filterLower = FilterText.ToLowerInvariant();
-                filtered = filtered.Where(v => 
+                filtered = filtered.Where(v =>
                     v.Name.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
                     v.DataType.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
                     v.Value.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
@@ -347,4 +347,4 @@ namespace SysmacXmlViewer.ViewModels
             return true;
         }
     }
-} 
+}

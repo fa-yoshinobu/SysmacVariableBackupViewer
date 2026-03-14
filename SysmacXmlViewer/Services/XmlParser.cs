@@ -11,12 +11,12 @@ namespace SysmacXmlViewer.Services
         public XmlBackupData ParseXmlFile(string filePath)
         {
             var data = new XmlBackupData();
-            
+
             try
             {
                 var doc = XDocument.Load(filePath);
                 var content = doc.Root;
-                
+
                 if (content == null)
                 {
                     throw new InvalidOperationException("XMLファイルのルート要素が見つかりません。");
@@ -28,7 +28,7 @@ namespace SysmacXmlViewer.Services
                 {
                     data.ProjectInfo = ParseHeader(header);
                 }
-                
+
                 // 変数情報の解析
                 var retainVariable = content.Element("Body")?.Element("RetainVariable");
                 if (retainVariable != null)
@@ -37,7 +37,7 @@ namespace SysmacXmlViewer.Services
                     {
                         var variable = ParseVariableItem(item);
                         data.Variables.Add(variable);
-                        
+
                         // データ型別にグループ化
                         if (!data.VariablesByType.ContainsKey(variable.DataType))
                         {
@@ -51,10 +51,10 @@ namespace SysmacXmlViewer.Services
             {
                 throw new XmlParseException($"XMLファイルの解析に失敗しました: {ex.Message}", ex);
             }
-            
+
             return data;
         }
-        
+
         private ProjectInfo ParseHeader(XElement header)
         {
             var project = header.Element("Project");
@@ -63,8 +63,8 @@ namespace SysmacXmlViewer.Services
                 throw new InvalidOperationException("Project要素が見つかりません。");
             }
 
-                return new ProjectInfo
-                {
+            return new ProjectInfo
+            {
                 Id = project.Attribute("ID")?.Value ?? string.Empty,
                 Name = project.Attribute("Name")?.Value ?? string.Empty,
                 Tracking = project.Attribute("Tracking")?.Value ?? string.Empty,
@@ -73,17 +73,17 @@ namespace SysmacXmlViewer.Services
                 UnitVersion = project.Element("UnitVersion")?.Value ?? string.Empty,
                 Version = header.Element("Version")?.Value ?? string.Empty,
                 EnableOffset = bool.TryParse(header.Element("EnableOffset")?.Value, out var enable)
-                    ? enable
-                    : false
-                };
+                ? enable
+                : false
+            };
         }
-        
+
         private VariableItem ParseVariableItem(XElement item)
         {
             var name = item.Attribute("Name")?.Value ?? string.Empty;
             var dataType = item.Attribute("DataType")?.Value ?? string.Empty;
             var rawValue = item.Element("Data")?.Value ?? string.Empty;
-            
+
             return new VariableItem
             {
                 Name = name,
@@ -111,7 +111,7 @@ namespace SysmacXmlViewer.Services
                 s = s.Substring("VAR:/".Length);
             }
 
-            var parts = s.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
+            var parts = s.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
             return string.Join("/", parts);
         }
 
@@ -122,11 +122,11 @@ namespace SysmacXmlViewer.Services
             var idx = displayPath.IndexOf('/');
             return idx > 0 ? displayPath.Substring(0, idx) : displayPath;
         }
-        
+
         private string ExtractDisplayName(string fullName)
         {
             if (string.IsNullOrEmpty(fullName)) return string.Empty;
-            
+
             // VAR://GUID/部分を除去
             var parts = fullName.Split('/');
             if (parts.Length > 1)
@@ -135,11 +135,11 @@ namespace SysmacXmlViewer.Services
             }
             return fullName;
         }
-        
+
         private string ExtractGroupName(string fullName)
         {
             if (string.IsNullOrEmpty(fullName)) return string.Empty;
-            
+
             var parts = fullName.Split('/');
             if (parts.Length > 2)
             {
@@ -151,9 +151,9 @@ namespace SysmacXmlViewer.Services
 
     public class XmlParseException : Exception
     {
-        public XmlParseException(string message, Exception innerException) 
+        public XmlParseException(string message, Exception innerException)
             : base(message, innerException)
         {
         }
     }
-} 
+}

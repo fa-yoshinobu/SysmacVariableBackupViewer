@@ -14,4 +14,4 @@ namespace SysmacXmlViewer.Models
             VariablesByType = new Dictionary<string, List<VariableItem>>();
         }
     }
-} 
+}

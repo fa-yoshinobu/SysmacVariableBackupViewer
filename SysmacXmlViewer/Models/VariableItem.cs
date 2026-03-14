@@ -125,7 +125,7 @@ namespace SysmacXmlViewer.Models
 
                 var parts = Name.Split('/');
                 string result = parts.Length > 1 ? string.Join("/", parts.Skip(1)) : Name;
-                
+
                 _hierarchicalPathCache.TryAdd(Name, result);
                 return result;
             }
@@ -137,7 +137,7 @@ namespace SysmacXmlViewer.Models
             get
             {
                 if (!IsStringArray) return null;
-                
+
                 // キャッシュから取得を試行
                 if (_stringArrayCharLimitCache.TryGetValue(DataType, out int? cachedResult))
                 {
@@ -146,7 +146,7 @@ namespace SysmacXmlViewer.Models
 
                 var match = Regex.Match(DataType, @"STRING\[(\d+)\]");
                 int? result = match.Success && int.TryParse(match.Groups[1].Value, out int charCount) ? charCount : null;
-                
+
                 _stringArrayCharLimitCache.TryAdd(DataType, result);
                 return result;
             }
@@ -183,7 +183,7 @@ namespace SysmacXmlViewer.Models
             {
                 // キャッシュキーを作成
                 string cacheKey = $"{DataType}_{Value}";
-                
+
                 // キャッシュから取得を試行
                 if (_convertedValueCache.TryGetValue(cacheKey, out string? cachedResult))
                 {
@@ -256,7 +256,7 @@ namespace SysmacXmlViewer.Models
         // 16進数文字列かどうかを判定
         private bool IsHexString(string value)
         {
-            return !string.IsNullOrEmpty(value) && 
+            return !string.IsNullOrEmpty(value) &&
                    value.All(c => char.IsDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
         }
 
@@ -309,4 +309,4 @@ namespace SysmacXmlViewer.Models
             _stringArrayCharLimitCache.Clear();
         }
     }
-} 
+}

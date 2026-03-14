@@ -88,7 +88,7 @@ namespace SysmacXmlViewer.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to open About window: {ex.Message}", "Error", 
+                MessageBox.Show($"Failed to open About window: {ex.Message}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -98,4 +98,4 @@ namespace SysmacXmlViewer.Views
             Close();
         }
     }
-} 
+}

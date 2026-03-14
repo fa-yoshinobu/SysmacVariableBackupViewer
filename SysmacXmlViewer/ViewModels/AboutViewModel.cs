@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SysmacXmlViewer.ViewModels
 {
@@ -18,6 +21,7 @@ namespace SysmacXmlViewer.ViewModels
         public string ProductVersion { get; }
         public string CompanyName { get; }
         public string Copyright { get; }
+        public string TargetFrameworkDisplay { get; }
         public List<LibraryInfo> Libraries { get; }
         public string CodePagesLicense { get; }
         public string DotNetLicense { get; }
@@ -27,107 +31,106 @@ namespace SysmacXmlViewer.ViewModels
 
         public AboutViewModel()
         {
-            // デフォルト値を設定
-            RuntimeVersion = "Unknown";
-            OSVersion = "Unknown";
-            Architecture = "Unknown";
+            RuntimeVersion = RuntimeInformation.FrameworkDescription;
+            OSVersion = RuntimeInformation.OSDescription;
+            Architecture = RuntimeInformation.ProcessArchitecture.ToString();
+            BuildDate = "Unknown";
             AssemblyVersion = "Unknown";
             ProductName = "SysmacVariableBackupViewer";
-            ProductVersion = "1.0.4";
+            ProductVersion = "Unknown";
             CompanyName = "SysmacVariableBackupViewer";
-            Copyright = "Copyright © 2025";
-            BuildDate = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            Copyright = "Copyright (c) 2025";
+            TargetFrameworkDisplay = $".NET {Environment.Version.Major}.0 Windows";
             Libraries = new List<LibraryInfo>();
             Author = "fa-yoshinobu";
             GitHubUrl = "https://github.com/fa-yoshinobu/SysmacVariableBackupViewer";
-            CodePagesLicense = "License information unavailable";
-            DotNetLicense = "License information unavailable";
+            CodePagesLicense = GetCodePagesLicense();
+            DotNetLicense = GetDotNetLicense();
             ApplicationLicense = "License information unavailable";
-
-            // システム情報を安全に取得
-            try
-            {
-                RuntimeVersion = Environment.Version.ToString();
-            }
-            catch { }
-
-            try
-            {
-                OSVersion = Environment.OSVersion.ToString();
-            }
-            catch { }
-
-            try
-            {
-                Architecture = RuntimeInformation.ProcessArchitecture.ToString();
-            }
-            catch { }
 
             try
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var version = assembly.GetName().Version;
                 AssemblyVersion = version?.ToString() ?? "Unknown";
+                ProductVersion = AssemblyVersion;
             }
-            catch { }
+            catch
+            {
+            }
 
             try
             {
-                var assembly = Assembly.GetExecutingAssembly();
-                var fileVersionInfo = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
-                ProductName = fileVersionInfo.ProductName ?? "SysmacVariableBackupViewer";
-                ProductVersion = fileVersionInfo.ProductVersion ?? "1.0.4";
-                CompanyName = fileVersionInfo.CompanyName ?? "SysmacVariableBackupViewer";
-                Copyright = fileVersionInfo.LegalCopyright ?? "Copyright © 2025";
-            }
-            catch { }
-
-            try
-            {
-                Libraries = new List<LibraryInfo>
+                var processPath = Environment.ProcessPath;
+                if (!string.IsNullOrWhiteSpace(processPath))
                 {
-                    new LibraryInfo
-                    {
-                        Name = "System.Text.Encoding.CodePages",
-                        Version = "7.0.0",
-                        License = "MIT",
-                        Description = "Provides encoding support for various code pages"
-                    },
-                    new LibraryInfo
-                    {
-                        Name = ".NET 6.0 Runtime",
-                        Version = "6.0.0",
-                        License = "MIT",
-                        Description = "Microsoft .NET Framework runtime"
-                    },
-                    new LibraryInfo
-                    {
-                        Name = "Windows Presentation Foundation (WPF)",
-                        Version = "6.0.0",
-                        License = "MIT",
-                        Description = "UI framework for Windows desktop applications"
-                    }
-                };
+                    var fileVersionInfo = FileVersionInfo.GetVersionInfo(processPath);
+
+                    ProductName = string.IsNullOrWhiteSpace(fileVersionInfo.ProductName)
+                        ? ProductName
+                        : fileVersionInfo.ProductName;
+                    ProductVersion = string.IsNullOrWhiteSpace(fileVersionInfo.ProductVersion)
+                        ? ProductVersion
+                        : fileVersionInfo.ProductVersion;
+                    CompanyName = string.IsNullOrWhiteSpace(fileVersionInfo.CompanyName)
+                        ? CompanyName
+                        : fileVersionInfo.CompanyName;
+                    Copyright = string.IsNullOrWhiteSpace(fileVersionInfo.LegalCopyright)
+                        ? Copyright
+                        : fileVersionInfo.LegalCopyright;
+                    BuildDate = File.GetLastWriteTime(processPath).ToString("yyyy-MM-dd HH:mm:ss");
+                }
             }
-            catch { }
+            catch
+            {
+            }
 
             try
             {
-                CodePagesLicense = GetCodePagesLicense();
+                Libraries = CreateLibraries();
             }
-            catch { }
-
-            try
+            catch
             {
-                DotNetLicense = GetDotNetLicense();
             }
-            catch { }
 
             try
             {
                 ApplicationLicense = GetApplicationLicense();
             }
-            catch { }
+            catch
+            {
+            }
+        }
+
+        private static List<LibraryInfo> CreateLibraries()
+        {
+            var runtimeVersion = $"{Environment.Version.Major}.{Environment.Version.Minor}.{Environment.Version.Build}";
+            var codePagesVersion = typeof(CodePagesEncodingProvider).Assembly.GetName().Version?.ToString(3) ?? "Unknown";
+
+            return new List<LibraryInfo>
+            {
+                new LibraryInfo
+                {
+                    Name = "System.Text.Encoding.CodePages",
+                    Version = codePagesVersion,
+                    License = "MIT",
+                    Description = "Provides encoding support for code pages"
+                },
+                new LibraryInfo
+                {
+                    Name = ".NET Runtime",
+                    Version = runtimeVersion,
+                    License = "MIT",
+                    Description = "Microsoft .NET runtime"
+                },
+                new LibraryInfo
+                {
+                    Name = "Windows Presentation Foundation (WPF)",
+                    Version = runtimeVersion,
+                    License = "MIT",
+                    Description = "UI framework for Windows desktop applications"
+                }
+            };
         }
 
         private string GetCodePagesLicense()
@@ -185,7 +188,7 @@ https://github.com/dotnet/runtime/blob/main/LICENSE.TXT";
 
         private string GetApplicationLicense()
         {
-            return @"SysmacVariableBackupViewer License Agreement
+            return $@"SysmacVariableBackupViewer License Agreement
 
 Copyright (c) 2025 All rights reserved.
 
@@ -203,8 +206,8 @@ agreements.
 
 For technical support or licensing inquiries, please contact the developer.
 
-Version: 1.0.4
-Build Date: " + BuildDate + @"
+Version: {ProductVersion}
+Build Date: {BuildDate}
 
 Features:
 - XML backup file parsing and viewing

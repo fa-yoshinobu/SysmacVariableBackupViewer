@@ -23,7 +23,7 @@ namespace SysmacXmlViewer.Services
 
             // キャッシュキーを作成
             string cacheKey = $"{dataType}_{rawValue}";
-            
+
             // キャッシュから取得を試行
             if (_conversionCache.TryGetValue(cacheKey, out string? cachedResult))
             {
@@ -46,45 +46,45 @@ namespace SysmacXmlViewer.Services
                         case "BOOL":
                             result = bool.TryParse(rawValue, out bool boolValue) ? boolValue.ToString() : rawValue;
                             break;
-                        
+
                         case "WORD":
                         case "UINT":
                             result = ushort.TryParse(rawValue, out ushort wordValue) ? wordValue.ToString() : rawValue;
                             break;
-                        
+
                         case "INT":
                             result = short.TryParse(rawValue, out short intValue) ? intValue.ToString() : rawValue;
                             break;
-                        
+
                         case "REAL":
                             result = ConvertRealToDecimal(rawValue);
                             break;
-                        
+
                         case "LREAL":
                             result = ConvertLRealToDecimal(rawValue);
                             break;
-                        
+
                         case "STRING":
                             // string型の場合は16進数文字列をUTF-8文字列に変換
                             result = ConvertStringArrayToString(dataType, rawValue);
                             break;
-                        
+
                         case "DATE_AND_TIME":
                             result = ConvertDateAndTimeToString(rawValue);
                             break;
-                        
+
                         case "TIME":
                             result = ConvertTimeToString(rawValue);
                             break;
-                        
+
                         case "DATE":
                             result = ConvertDateToString(rawValue);
                             break;
-                        
+
                         case "TIME_OF_DAY":
                             result = ConvertTimeOfDayToString(rawValue);
                             break;
-                        
+
                         default:
                             // 不明なデータ型の場合はそのまま返す
                             result = rawValue;
@@ -110,7 +110,7 @@ namespace SysmacXmlViewer.Services
             {
                 // 16進数データを文字列に変換
                 string convertedString = ConvertHexToString(rawValue);
-                
+
                 // 変換後の文字列のみを返す
                 return convertedString;
             }
@@ -129,17 +129,17 @@ namespace SysmacXmlViewer.Services
                 {
                     // ナノ秒を秒に変換
                     long ticks = nanoseconds / 100;
-                    
+
                     // Sysmac Studioの基準日時: 1970年1月1日 00:00:00 (Unix時間)
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                    
+
                     // 基準日時からの経過秒数として解釈
                     DateTime dateTime = baseDateTime.AddTicks(ticks);
-                    
+
                     // DATE_AND_TIME形式: yyyy-MM-dd-HH:mm:ss.ff
                     return dateTime.ToString("yyyy-MM-dd-HH:mm:ss.ff", CultureInfo.InvariantCulture);
                 }
-                
+
                 // 変換できない場合は元の値を返す
                 return rawValue;
             }
@@ -157,13 +157,13 @@ namespace SysmacXmlViewer.Services
                 {
                     // ナノ秒を秒に変換
                     long ticks = nanoseconds / 100;
-                    
+
                     // Sysmac Studioの基準日時: 1970年1月1日 00:00:00 (Unix時間)
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                    
+
                     // 基準日時からの経過秒数として解釈
                     DateTime dateTime = baseDateTime.AddTicks(ticks);
-                    
+
                     // DATE形式: yyyy-MM-dd
                     return dateTime.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
                 }
@@ -184,7 +184,7 @@ namespace SysmacXmlViewer.Services
                     // 負の値の処理（long.MinValueの特殊ケースを考慮）
                     bool isNegative;
                     long absNanoseconds;
-                    
+
                     if (nanoseconds == long.MinValue)
                     {
                         // long.MinValueの場合は、直接計算で処理
@@ -193,7 +193,7 @@ namespace SysmacXmlViewer.Services
                         absNanoseconds = unchecked(absNanoseconds + 1L);
                         // long.MinValueの場合は必ず負の値として扱う
                         isNegative = true;
-                        
+
                         // absNanosecondsが負の値の場合は正の値に修正
                         if (absNanoseconds < 0)
                         {
@@ -205,31 +205,31 @@ namespace SysmacXmlViewer.Services
                         isNegative = nanoseconds < 0;
                         absNanoseconds = Math.Abs(nanoseconds);
                     }
-                    
+
                     // absNanosecondsが負の値の場合は正の値に修正
                     if (absNanoseconds < 0)
                     {
                         absNanoseconds = Math.Abs(absNanoseconds);
                     }
-                    
+
                     // ナノ秒を秒に変換（大きな値に対応するためdoubleを使用）
                     double totalSeconds = absNanoseconds / 1_000_000_000.0;
-                    
+
                     // 日、時、分、秒、ミリ秒に分解
                     long totalDays = (long)(totalSeconds / 86400);
                     int hours = (int)((totalSeconds % 86400) / 3600);
                     int minutes = (int)((totalSeconds % 3600) / 60);
                     int seconds = (int)(totalSeconds % 60);
                     double milliseconds = (totalSeconds * 1000) % 1000;
-                    
+
                     // 時間形式で表示（例: -106751d23h47m16s854.775ms）
                     var parts = new List<string>();
-                    
+
                     if (isNegative)
                     {
                         parts.Add("-");
                     }
-                    
+
                     if (totalDays > 0)
                     {
                         parts.Add($"{totalDays}d");
@@ -247,7 +247,7 @@ namespace SysmacXmlViewer.Services
                         parts.Add($"{seconds}s");
                     }
                     parts.Add($"{milliseconds:F3}ms");
-                    
+
                     string result = string.Join("", parts);
                     return result;
                 }
@@ -267,19 +267,19 @@ namespace SysmacXmlViewer.Services
                 {
                     // 1日のナノ秒数
                     const long nanosecondsPerDay = 86_400_000_000_000L;
-                    
+
                     // 日を除いたナノ秒数を計算
                     long timeNanoseconds = nanoseconds % nanosecondsPerDay;
-                    
+
                     // ナノ秒を秒に変換
                     double totalSeconds = timeNanoseconds / 1_000_000_000.0;
-                    
+
                     // 時、分、秒、ミリ秒に分解
                     int hours = (int)(totalSeconds / 3600);
                     int minutes = (int)((totalSeconds % 3600) / 60);
                     int seconds = (int)(totalSeconds % 60);
                     int centiseconds = (int)((totalSeconds * 100) % 100);
-                    
+
                     return $"{hours:D2}:{minutes:D2}:{seconds:D2}.{centiseconds:D2}";
                 }
                 return rawValue;
@@ -339,7 +339,7 @@ namespace SysmacXmlViewer.Services
             {
                 // 文字列をバイト配列に変換（UTF-8エンコーディング）
                 byte[] bytes = Encoding.UTF8.GetBytes(text);
-                
+
                 // バイト配列を16進数文字列に変換
                 return BitConverter.ToString(bytes).Replace("-", "");
             }
@@ -367,36 +367,36 @@ namespace SysmacXmlViewer.Services
                 {
                     case "BOOL":
                         return bool.TryParse(displayValue, out bool boolValue) ? boolValue.ToString() : displayValue;
-                    
+
                     case "WORD":
                     case "UINT":
                         return ushort.TryParse(displayValue, out ushort wordValue) ? wordValue.ToString() : displayValue;
-                    
+
                     case "INT":
                         return short.TryParse(displayValue, out short intValue) ? intValue.ToString() : displayValue;
-                    
+
                     case "REAL":
                         return ConvertRealToDecimal(displayValue);
-                    
+
                     case "LREAL":
                         return ConvertLRealToDecimal(displayValue);
-                    
+
                     case "STRING":
                         // string型の場合はそのまま文字列として返す
                         return displayValue;
-                    
+
                     case "DATE_AND_TIME":
                         return ConvertStringToDateAndTimeValue(displayValue);
-                    
+
                     case "TIME":
                         return ConvertStringToTimeValue(displayValue);
-                    
+
                     case "DATE":
                         return ConvertStringToDateValue(displayValue);
-                    
+
                     case "TIME_OF_DAY":
                         return ConvertStringToTimeOfDayValue(displayValue);
-                    
+
                     default:
                         // 不明なデータ型の場合はそのまま返す
                         return displayValue;
@@ -414,18 +414,18 @@ namespace SysmacXmlViewer.Services
             try
             {
                 // YYYY-MM-dd-HH:mm:ss.ff 形式の文字列をDATE_AND_TIME形式に変換
-                if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd-HH:mm:ss.ff", 
+                if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd-HH:mm:ss.ff",
                     CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out DateTime dateTime))
                 {
                     // 基準日時: 1970年1月1日 00:00:00
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                    
+
                     // 経過秒数を計算
                     long ticks = (dateTime - baseDateTime).Ticks;
                     long nanoseconds = ticks * 100;
                     return nanoseconds.ToString(CultureInfo.InvariantCulture);
                 }
-                
+
                 return displayValue;
             }
             catch
@@ -455,18 +455,18 @@ namespace SysmacXmlViewer.Services
                 if (displayValue.EndsWith("ms"))
                 {
                     string timePart = displayValue.Substring(0, displayValue.Length - 2);
-                    
+
                     // 負の値の処理
                     bool isNegative = timePart.StartsWith("-");
                     if (isNegative)
                     {
                         timePart = timePart.Substring(1); // マイナス記号を除去
                     }
-                    
+
                     // 日、時、分、秒、ミリ秒を解析
                     int days = 0, hours = 0, minutes = 0, seconds = 0;
                     double milliseconds = 0;
-                    
+
                     // 正規表現で各部分を抽出
                     var dayMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)d");
                     if (dayMatch.Success)
@@ -474,34 +474,34 @@ namespace SysmacXmlViewer.Services
                         days = int.Parse(dayMatch.Groups[1].Value);
                         timePart = timePart.Replace(dayMatch.Value, "");
                     }
-                    
+
                     var hourMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)h");
                     if (hourMatch.Success)
                     {
                         hours = int.Parse(hourMatch.Groups[1].Value);
                         timePart = timePart.Replace(hourMatch.Value, "");
                     }
-                    
+
                     var minuteMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)m");
                     if (minuteMatch.Success)
                     {
                         minutes = int.Parse(minuteMatch.Groups[1].Value);
                         timePart = timePart.Replace(minuteMatch.Value, "");
                     }
-                    
+
                     var secondMatch = System.Text.RegularExpressions.Regex.Match(timePart, @"(\d+)s");
                     if (secondMatch.Success)
                     {
                         seconds = int.Parse(secondMatch.Groups[1].Value);
                         timePart = timePart.Replace(secondMatch.Value, "");
                     }
-                    
+
                     // ミリ秒部分を解析（新しい形式: 854.775ms）
                     if (timePart.Length > 0)
                     {
                         milliseconds = double.Parse(timePart, System.Globalization.CultureInfo.InvariantCulture);
                     }
-                    
+
                     // 総ナノ秒数を計算
                     long totalNanoseconds = (long)(
                         days * 86400L * 1_000_000_000L +
@@ -510,13 +510,13 @@ namespace SysmacXmlViewer.Services
                         seconds * 1_000_000_000L +
                         milliseconds * 1_000_000L
                     );
-                    
+
                     // 負の値の場合はマイナスを付ける
                     if (isNegative)
                     {
                         totalNanoseconds = -totalNanoseconds;
                     }
-                    
+
                     return totalNanoseconds.ToString();
                 }
                 return displayValue;
@@ -532,12 +532,12 @@ namespace SysmacXmlViewer.Services
             try
             {
                 // "yyyy-MM-dd" 形式の文字列をナノ秒に変換
-                if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd", 
+                if (DateTime.TryParseExact(displayValue, "yyyy-MM-dd",
                     CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out DateTime parsedDateTime))
                 {
                     // 基準日時: 1970年1月1日 00:00:00
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-                    
+
                     // 経過秒数を計算
                     long ticks = (parsedDateTime - baseDateTime).Ticks;
                     long nanoseconds = ticks * 100;
@@ -556,7 +556,7 @@ namespace SysmacXmlViewer.Services
             try
             {
                 // "HH:mm:ss.ff" 形式の文字列をナノ秒に変換
-                if (TimeSpan.TryParseExact(displayValue, @"hh\:mm\:ss\.ff", 
+                if (TimeSpan.TryParseExact(displayValue, @"hh\:mm\:ss\.ff",
                     CultureInfo.InvariantCulture, out TimeSpan timeSpan))
                 {
                     long nanoseconds = (long)(timeSpan.TotalSeconds * 1_000_000_000);
@@ -587,36 +587,36 @@ namespace SysmacXmlViewer.Services
                 {
                     case "BOOL":
                         return bool.TryParse(value, out _);
-                    
+
                     case "WORD":
                     case "UINT":
                         return ushort.TryParse(value, out _);
-                    
+
                     case "INT":
                         return short.TryParse(value, out _);
-                    
+
                     case "REAL":
                         return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _);
-                    
+
                     case "LREAL":
                         return double.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out _);
-                    
+
                     case "STRING":
                         // string型は常に有効
                         return true;
-                    
+
                     case "DATE_AND_TIME":
                         return IsValidDateAndTimeValue(value);
-                    
+
                     case "TIME":
                         return IsValidTimeValue(value);
-                    
+
                     case "DATE":
                         return IsValidDateValue(value);
-                    
+
                     case "TIME_OF_DAY":
                         return IsValidTimeOfDayValue(value);
-                    
+
                     default:
                         // 不明なデータ型は有効とする
                         return true;
@@ -637,23 +637,23 @@ namespace SysmacXmlViewer.Services
                 {
                     // ナノ秒を秒に変換
                     long seconds = nanoseconds / 1_000_000_000;
-                    
+
                     // Sysmac Studioの基準日時: 1970年1月1日 00:00:00
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     DateTime parsedDateTime = baseDateTime.AddSeconds(seconds);
-                    
+
                     // 妥当な範囲かチェック（例: 1970年～2106年）
                     return parsedDateTime.Year >= 1970 && parsedDateTime.Year <= 2106;
                 }
-                
+
                 // 文字列形式の場合（yyyy-MM-dd-HH:mm:ss.ff）
-                if (DateTime.TryParseExact(value, "yyyy-MM-dd-HH:mm:ss.ff", 
+                if (DateTime.TryParseExact(value, "yyyy-MM-dd-HH:mm:ss.ff",
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateAndTime))
                 {
                     // 妥当な範囲かチェック（例: 1970年～2106年）
                     return parsedDateAndTime.Year >= 1970 && parsedDateAndTime.Year <= 2106;
                 }
-                
+
                 return false;
             }
             catch
@@ -673,32 +673,32 @@ namespace SysmacXmlViewer.Services
                     // 継続時間として扱うため、long範囲であれば許容
                     return true;
                 }
-                
+
                 // 文字列形式の場合（-106751d23h47m16s854.775ms）
                 if (value.EndsWith("ms"))
                 {
                     string timePart = value.Substring(0, value.Length - 2);
-                    
+
                     // 負の値の処理
                     if (timePart.StartsWith("-"))
                     {
                         timePart = timePart.Substring(1);
                     }
-                    
+
                     // 時間形式の妥当性チェック
                     if (timePart.Contains("d") || timePart.Contains("h") || timePart.Contains("m") || timePart.Contains("s"))
                     {
                         // 時間形式の場合は基本的に妥当とする
                         return true;
                     }
-                    
+
                     // 単純なミリ秒値の場合（小数点付きも対応）
                     if (double.TryParse(timePart, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out double milliseconds))
                     {
                         return milliseconds >= 0 && milliseconds <= 86400000; // 1日分のミリ秒
                     }
                 }
-                
+
                 return false;
             }
             catch
@@ -716,23 +716,23 @@ namespace SysmacXmlViewer.Services
                 {
                     // ナノ秒を秒に変換
                     long seconds = nanoseconds / 1_000_000_000;
-                    
+
                     // Sysmac Studioの基準日時: 1970年1月1日 00:00:00
                     DateTime baseDateTime = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                     DateTime parsedDate = baseDateTime.AddSeconds(seconds);
-                    
+
                     // 妥当な範囲かチェック（例: 1970年～2106年）
                     return parsedDate.Year >= 1970 && parsedDate.Year <= 2106;
                 }
-                
+
                 // 文字列形式の場合（yyyy-MM-dd）
-                if (DateTime.TryParseExact(value, "yyyy-MM-dd", 
+                if (DateTime.TryParseExact(value, "yyyy-MM-dd",
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDateValue))
                 {
                     // 妥当な範囲かチェック（例: 1970年～2106年）
                     return parsedDateValue.Year >= 1970 && parsedDateValue.Year <= 2106;
                 }
-                
+
                 return false;
             }
             catch
@@ -751,15 +751,15 @@ namespace SysmacXmlViewer.Services
                     // 1日のナノ秒数以内かチェック
                     return nanoseconds >= 0 && nanoseconds < 86_400_000_000_000L;
                 }
-                
+
                 // 文字列形式の場合（HH:mm:ss.ff）
-                if (TimeSpan.TryParseExact(value, @"hh\:mm\:ss\.ff", 
+                if (TimeSpan.TryParseExact(value, @"hh\:mm\:ss\.ff",
                     CultureInfo.InvariantCulture, out TimeSpan timeSpan))
                 {
                     // 1日以内かチェック
                     return timeSpan.TotalHours >= 0 && timeSpan.TotalHours < 24;
                 }
-                
+
                 return false;
             }
             catch
@@ -808,7 +808,7 @@ namespace SysmacXmlViewer.Services
             bool result = !string.IsNullOrEmpty(value) &&
                          (value.Length % 2 == 0) &&
                          value.All(c => char.IsDigit(c) || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f'));
-            
+
             // キャッシュに保存
             _hexStringCache.TryAdd(value, result);
             return result;
@@ -847,16 +847,16 @@ namespace SysmacXmlViewer.Services
                     if (rawValue.Length >= 8)
                     {
                         // 2文字ずつペアにして並び替え
-                        correctedHex = rawValue.Substring(6, 2) + rawValue.Substring(4, 2) + 
+                        correctedHex = rawValue.Substring(6, 2) + rawValue.Substring(4, 2) +
                                       rawValue.Substring(2, 2) + rawValue.Substring(0, 2);
                     }
-                    
+
                     // 修正された16進数文字列をバイト配列に変換
                     byte[] bytes = ConvertHexToBytes(correctedHex);
-                    
+
                     // ビッグエンディアンからリトルエンディアンに変換
                     // correctedHexでエンディアン補正済みのため、ここでの反転は不要
-                    
+
                     // 4バイト（32ビット）のREAL型として処理
                     if (bytes.Length >= 4)
                     {
@@ -865,13 +865,13 @@ namespace SysmacXmlViewer.Services
                         return floatValue.ToString("F6", CultureInfo.InvariantCulture);
                     }
                 }
-                
+
                 // 16進数でない場合は、通常の数値として解析
                 if (float.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float realValue))
                 {
                     return realValue.ToString("F6", CultureInfo.InvariantCulture);
                 }
-                
+
                 return rawValue;
             }
             catch
@@ -903,18 +903,18 @@ namespace SysmacXmlViewer.Services
                     if (rawValue.Length >= 16)
                     {
                         // 2文字ずつペアにして並び替え（8バイト分）
-                        correctedHex = rawValue.Substring(14, 2) + rawValue.Substring(12, 2) + 
-                                      rawValue.Substring(10, 2) + rawValue.Substring(8, 2) + 
-                                      rawValue.Substring(6, 2) + rawValue.Substring(4, 2) + 
+                        correctedHex = rawValue.Substring(14, 2) + rawValue.Substring(12, 2) +
+                                      rawValue.Substring(10, 2) + rawValue.Substring(8, 2) +
+                                      rawValue.Substring(6, 2) + rawValue.Substring(4, 2) +
                                       rawValue.Substring(2, 2) + rawValue.Substring(0, 2);
                     }
-                    
+
                     // 修正された16進数文字列をバイト配列に変換
                     byte[] bytes = ConvertHexToBytes(correctedHex);
-                    
+
                     // ビッグエンディアンからリトルエンディアンに変換
                     // correctedHexでエンディアン補正済みのため、ここでの反転は不要
-                    
+
                     // 8バイト（64ビット）のLREAL型として処理
                     if (bytes.Length >= 8)
                     {
@@ -923,13 +923,13 @@ namespace SysmacXmlViewer.Services
                         return doubleValue.ToString("F6", CultureInfo.InvariantCulture);
                     }
                 }
-                
+
                 // 16進数でない場合は、通常の数値として解析
                 if (double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double lrealValue))
                 {
                     return lrealValue.ToString("F6", CultureInfo.InvariantCulture);
                 }
-                
+
                 return rawValue;
             }
             catch
@@ -945,4 +945,4 @@ namespace SysmacXmlViewer.Services
             _hexStringCache.Clear();
         }
     }
-} 
+}

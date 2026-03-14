@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+          cache: true
+          cache-dependency-path: SysmacXmlViewer/SysmacXmlViewer.csproj
+
+      - name: Restore
+        run: dotnet restore SysmacXmlViewer.sln
+
+      - name: Check formatting
+        run: dotnet format whitespace SysmacXmlViewer.sln --verify-no-changes
+
+      - name: Build with analyzers
+        run: dotnet build SysmacXmlViewer.sln -c Release --no-restore /warnaserror -p:EnableNETAnalyzers=true -p:AnalysisMode=Minimum -p:AnalysisLevel=latest -p:WarningsNotAsErrors=CA1822%3BCA1845%3BCA1847%3BCA1854%3BCA1861%3BCA1862%3BCA1866%3BCA1872
+
+      - name: Publish single-file executable
+        run: dotnet publish SysmacXmlViewer\SysmacXmlViewer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --no-restore -o artifacts\publish
+
+      - name: Verify publish output
+        shell: pwsh
+        run: |
+          $exe = "artifacts/publish/SysmacVariableBackupViewer.exe"
+          if (-not (Test-Path $exe)) {
+            throw "Single-file executable was not created: $exe"
+          }
+
+          $files = Get-ChildItem artifacts/publish -File
+          if ($files.Count -ne 1) {
+            throw "Expected a single published file, found $($files.Count)."
+          }
+
+          $sizeMiB = [math]::Round($files[0].Length / 1MB, 2)
+          Write-Host "Created $($files[0].Name) ($sizeMiB MiB)"
