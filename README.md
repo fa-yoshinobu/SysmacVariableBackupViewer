@@ -7,106 +7,211 @@
 [![License](https://img.shields.io/badge/license-custom-lightgrey)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/blob/main/SysmacXmlViewer/LICENSE.txt)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-[譌･譛ｬ隱枉(#japanese) | [English](#english)
+
+[English](#english) | [日本語](#japanese)
 
 ![SysmacVariableBackupViewer Screenshot](image1.png)
 
-## Japanese
+---
 
-### 讎りｦ・
-SysmacVariableBackupViewer 縺ｯ縲ヾysmac Studio 縺ｮ XML 繝舌ャ繧ｯ繧｢繝・・繝輔ぃ繧､繝ｫ繧定｡ｨ遉ｺ繝ｻ遒ｺ隱阪☆繧九◆繧√・ Windows 繝・せ繧ｯ繝医ャ繝励い繝励Μ縺ｧ縺吶ょ､画焚荳隕ｧ縺ｮ蜿ら・縲√ョ繝ｼ繧ｿ蝙句､画鋤縲∫ｵ槭ｊ霎ｼ縺ｿ縲，SV 繧ｨ繧ｯ繧ｹ繝昴・繝医ｒ陦後∴縺ｾ縺吶・
-### 荳ｻ縺ｪ讖溯・
-
-- XML 繝舌ャ繧ｯ繧｢繝・・繝輔ぃ繧､繝ｫ縺ｮ隱ｭ縺ｿ霎ｼ縺ｿ縺ｨ隗｣譫・- 螟画焚荳隕ｧ縺ｮ陦ｨ蠖｢蠑剰｡ｨ遉ｺ
-- PLC 繝・・繧ｿ蝙九・閾ｪ蜍募､画鋤
-- 繝・く繧ｹ繝域､懃ｴ｢縺ｨ繝・・繧ｿ蝙九ヵ繧｣繝ｫ繧ｿ繝ｼ
-- CSV 繧ｨ繧ｯ繧ｹ繝昴・繝・- 蜊倅ｸ `exe` 驟榊ｸ・
-### 蜍穂ｽ懃腸蠅・
-- Windows 10 莉･髯・- .NET 8 Desktop Runtime
-- 4GB RAM 莉･荳翫ｒ謗ｨ螂ｨ
-
-### CI / Release 閾ｪ蜍募喧
-
-- `CI` workflow
-  - `dotnet format whitespace --verify-no-changes`
-  - `dotnet build -c Release /warnaserror`
-  - .NET analyzer 縺ｮ minimum 繝ｫ繝ｼ繝ｫ繧貞ｮ溯｡後＠縲∵里蟄倥・荳驛ｨ CA 繝ｫ繝ｼ繝ｫ縺ｯ隴ｦ蜻翫→縺励※蜃ｺ蜉・  - 蜊倅ｸ `exe` publish 縺ｮ繧ｹ繝｢繝ｼ繧ｯ繝・せ繝・- `Release` workflow
-  - `v*` 繧ｿ繧ｰ push 縺ｧ GitHub Release 繧定・蜍穂ｽ懈・
-  - `SysmacVariableBackupViewer-<version>-win-x64.exe` 繧定・蜍墓ｷｻ莉・  - `sha256` 繝輔ぃ繧､繝ｫ繧ょ酔譎ら函謌・
-### 繝ｭ繝ｼ繧ｫ繝ｫ繝薙Ν繝・
-```powershell
-git clone https://github.com/fa-yoshinobu/SysmacVariableBackupViewer.git
-cd SysmacVariableBackupViewer\SysmacXmlViewer
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
-```
-
-蜃ｺ蜉帛・:
-
-```text
-SysmacXmlViewer\bin\Release\net8.0-windows\win-x64\publish\SysmacVariableBackupViewer.exe
-```
-
-### 繝ｪ繝ｪ繝ｼ繧ｹ謇矩・
-```powershell
-git tag v1.0.5
-git push origin v1.0.5
-```
-
-繧ｿ繧ｰ繧・push 縺吶ｋ縺ｨ GitHub Actions 縺悟腰荳 `exe` 繧偵ン繝ｫ繝峨＠縲ヽelease 縺ｫ豺ｻ莉倥＠縺ｾ縺吶・
-### 繝ｩ繧､繧ｻ繝ｳ繧ｹ
-
-縺薙・繝ｪ繝昴ず繝医Μ縺ｯ繧ｫ繧ｹ繧ｿ繝繝ｩ繧､繧ｻ繝ｳ繧ｹ縺ｧ縺吶りｩｳ邏ｰ縺ｯ [SysmacXmlViewer/LICENSE.txt](SysmacXmlViewer/LICENSE.txt) 繧貞盾辣ｧ縺励※縺上□縺輔＞縲・
 ## English
 
 ### Overview
 
-SysmacVariableBackupViewer is a Windows desktop application for viewing and analyzing Sysmac Studio XML backup files. It provides variable browsing, data type conversion, filtering, and CSV export.
+SysmacVariableBackupViewer is a Windows desktop application for viewing and analyzing Sysmac Studio XML backup files. It provides a user-friendly interface to display variable data with advanced filtering and export capabilities.
 
 ### Key Features
 
-- Parse Sysmac Studio XML backup files
-- Display variables in a structured table
-- Convert PLC data types into readable values
-- Filter by text and data type
-- Export filtered rows to CSV
-- Ship as a single-file Windows executable
+- **XML Backup File Parsing**: Load and parse Sysmac Studio XML backup files
+- **Variable Data Display**: View variable information in a structured table format
+- **Data Type Conversion**: Automatic conversion of various PLC data types (hex, date/time, floating point, etc.)
+- **Advanced Filtering**: Real-time text search and data type filtering
+- **CSV Export**: Export filtered data to CSV format
+- **High Performance**: Optimized for large datasets with caching and virtualization
+- **About Window**: Display application information, system details, and license information
 
-### Requirements
+### Supported Data Types
+
+- **Basic Types**: BOOL, WORD, UINT, INT
+- **Floating Point**: REAL, LREAL
+- **String Types**: STRING
+- **Date/Time**: DATE_AND_TIME, TIME, DATE, TIME_OF_DAY
+
+### System Requirements
 
 - Windows 10 or later
-- .NET 8 Desktop Runtime
-- 4 GB RAM recommended
+- .NET 6.0 Runtime
+- Minimum 4GB RAM recommended
+- 100MB free disk space
 
-### Automated Quality and Release Flow
+### Usage
 
-- `CI` workflow
-  - verifies whitespace formatting with `dotnet format`
-  - builds in `Release` with warnings treated as errors
-  - runs a minimum .NET analyzer set while leaving selected legacy CA rules as non-blocking warnings
-  - smoke-tests single-file publish output
-- `Release` workflow
-  - runs automatically when a `v*` tag is pushed
-  - publishes a single-file `win-x64` executable to GitHub Releases
-  - uploads a matching `sha256` checksum file
+1. **Launch Application**: Run `SysmacVariableBackupViewer.exe`
+2. **Load File**: Click "Load File" button and select XML backup file
+3. **View Data**: Variable information is displayed in the main table
+4. **Filter Data**: Use text search and data type filters
+5. **Export**: Click "Export CSV" to save filtered data
+6. **About**: Access Help menu → About for application information
 
-### Local Build
+### Displayed Information
 
-```powershell
+| Column | Description |
+|--------|-------------|
+| Variable Name | Variable name with hierarchical structure |
+| Data Type | Data type |
+| Value | Original value from XML |
+| Converted Value | Human-readable converted value |
+| Offset | Memory offset |
+| Group | Group name (first part of hierarchy) |
+| Array Index | Array index (for array variables) |
+
+### Technical Specifications
+
+- **Framework**: .NET 6.0 WPF
+- **Architecture**: MVVM pattern
+- **Deployment**: Single-file executable
+- **Optimization**: ReadyToRun compilation, trimming enabled
+- **Memory Management**: Efficient caching and garbage collection
+
+### Build Instructions
+
+```bash
+# Clone repository
 git clone https://github.com/fa-yoshinobu/SysmacVariableBackupViewer.git
-cd SysmacVariableBackupViewer\SysmacXmlViewer
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
+
+# Navigate to project directory
+cd SysmacVariableBackupViewer/SysmacXmlViewer
+
+# Build application
+dotnet build
+
+# Publish single-file executable
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
 ```
 
-### Release
+### Project Structure
 
-```powershell
-git tag v1.0.5
-git push origin v1.0.5
 ```
-
-Pushing the tag triggers GitHub Actions to build the single-file executable and attach it to a GitHub Release.
+SysmacVariableBackupViewer/
+├── SysmacXmlViewer/
+│   ├── Models/          # Data models
+│   ├── ViewModels/      # MVVM view models
+│   ├── Views/           # WPF user interfaces
+│   ├── Services/        # Business logic services
+│   └── Commands/        # Command implementations
+├── README.md
+├── CHANGELOG.md
+└── LICENSE.txt
+```
 
 ### License
 
-This repository uses a custom license. See [SysmacXmlViewer/LICENSE.txt](SysmacXmlViewer/LICENSE.txt) for details.
+This software is provided "as is" without warranty. See LICENSE.txt for details.
 
+### Author
+
+- **Author**: fa-yoshinobu
+- **GitHub**: https://github.com/fa-yoshinobu/SysmacVariableBackupViewer
+
+---
+
+## Japanese
+
+### 概要
+
+![SysmacVariableBackupViewer スクリーンショット](image1.png)
+
+SysmacVariableBackupViewerは、Sysmac StudioのXMLバックアップファイルを表示・分析するためのWindowsデスクトップアプリケーションです。高度なフィルタリング機能とエクスポート機能を備えた、使いやすいインターフェースで変数データを表示します。
+
+### 主な機能
+
+- **XMLバックアップファイル解析**: Sysmac StudioのXMLバックアップファイルの読み込みと解析
+- **変数データ表示**: 構造化されたテーブル形式での変数情報表示
+- **データ型変換**: 各種PLCデータ型（16進数、日時、浮動小数点など）の自動変換
+- **高度なフィルタリング**: リアルタイムテキスト検索とデータ型フィルタリング
+- **CSVエクスポート**: フィルタリングされたデータのCSV形式での出力
+- **高性能**: キャッシュと仮想化による大規模データセットの最適化
+- **Aboutウィンドウ**: アプリケーション情報、システム詳細、ライセンス情報の表示
+
+### 対応データ型
+
+- **基本型**: BOOL, WORD, UINT, INT
+- **浮動小数点**: REAL, LREAL
+- **文字列型**: STRING
+- **日時型**: DATE_AND_TIME, TIME, DATE, TIME_OF_DAY
+
+### システム要件
+
+- Windows 10以降
+- .NET 6.0 Runtime
+- 推奨メモリ: 4GB以上
+- 空き容量: 100MB以上
+
+### 使用方法
+
+1. **アプリケーション起動**: `SysmacVariableBackupViewer.exe`を実行
+2. **ファイル読み込み**: 「Load File」ボタンをクリックしてXMLバックアップファイルを選択
+3. **データ表示**: メインテーブルに変数情報が表示されます
+4. **データフィルタリング**: テキスト検索とデータ型フィルタを使用
+5. **エクスポート**: 「Export CSV」をクリックしてフィルタリングされたデータを保存
+6. **About**: ヘルプメニュー→Aboutでアプリケーション情報を確認
+
+### 表示される情報
+
+| 列名 | 説明 |
+|------|------|
+| Variable Name | 階層構造を含む変数名 |
+| Data Type | データ型|
+| Value | XMLから読み込んだ元の値 |
+| Converted Value | 人間が読みやすい変換後の値 |
+| Offset | メモリオフセット |
+| Group | グループ名（階層の最初の部分） |
+| Array Index | 配列インデックス（配列の場合） |
+
+### 技術仕様
+
+- **フレームワーク**: .NET 6.0 WPF
+- **アーキテクチャ**: MVVMパターン
+- **配布形式**: 単一ファイル実行形式
+- **最適化**: ReadyToRunコンパイル、トリミング有効
+- **メモリ管理**: 効率的なキャッシュとガベージコレクション
+
+### ビルド手順
+
+```bash
+# リポジトリをクローン
+git clone https://github.com/fa-yoshinobu/SysmacVariableBackupViewer.git
+
+# プロジェクトディレクトリに移動
+cd SysmacVariableBackupViewer/SysmacXmlViewer
+
+# アプリケーションをビルド
+dotnet build
+
+# 単一ファイル実行形式で公開
+dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+```
+
+### プロジェクト構造
+
+```
+SysmacVariableBackupViewer/
+├── SysmacXmlViewer/
+│   ├── Models/          # データモデル
+│   ├── ViewModels/      # MVVMビューモデル
+│   ├── Views/           # WPFユーザーインターフェース
+│   ├── Services/        # ビジネスロジックサービス
+│   └── Commands/        # コマンド実装
+├── README.md
+├── CHANGELOG.md
+└── LICENSE.txt
+```
+
+### ライセンス
+
+本ソフトウェアは「現状のまま」提供され、保証はありません。詳細はLICENSE.txtを参照してください。
+
+### 作者
+
+- **作者**: fa-yoshinobu
+- **GitHub**: https://github.com/fa-yoshinobu/SysmacVariableBackupViewer
