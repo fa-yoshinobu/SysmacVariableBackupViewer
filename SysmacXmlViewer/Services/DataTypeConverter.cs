@@ -44,7 +44,9 @@ namespace SysmacXmlViewer.Services
                     switch (dataType.ToUpperInvariant())
                     {
                         case "BOOL":
-                            result = bool.TryParse(rawValue, out bool boolValue) ? boolValue.ToString() : rawValue;
+                            if (rawValue == "1") result = "True";
+                            else if (rawValue == "0") result = "False";
+                            else result = bool.TryParse(rawValue, out bool boolValue) ? boolValue.ToString() : rawValue;
                             break;
 
                         case "WORD":
