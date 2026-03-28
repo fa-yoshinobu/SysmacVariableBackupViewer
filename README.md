@@ -1,10 +1,9 @@
 ﻿# SysmacVariableBackupViewer
 
-[![Release](https://img.shields.io/github/v/release/fa-yoshinobu/SysmacVariableBackupViewer?display_name=tag&sort=semver)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/releases/latest)
+[![Release](https://img.shields.io/github/v/release/fa-yoshinobu/SysmacVariableBackupViewer?display_name=tag)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/fa-yoshinobu/SysmacVariableBackupViewer/ci.yml?branch=main&label=CI)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/actions/workflows/ci.yml)
-[![Static Analysis](https://img.shields.io/badge/static%20analysis-dotnet%20format%20%2B%20analyzers-0078D4)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/actions/workflows/ci.yml)
-[![Single File EXE](https://img.shields.io/badge/release-single--file%20exe-2EA043)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/actions/workflows/release.yml)
-[![License](https://img.shields.io/badge/license-custom-lightgrey)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/blob/main/SysmacXmlViewer/LICENSE.txt)
+[![Auto Release](https://img.shields.io/github/actions/workflow/status/fa-yoshinobu/SysmacVariableBackupViewer/release.yml?label=Auto%20Release)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/actions/workflows/release.yml)
+[![License](https://img.shields.io/github/license/fa-yoshinobu/SysmacVariableBackupViewer)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/blob/main/LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 
 

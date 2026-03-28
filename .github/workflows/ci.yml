@@ -41,6 +41,9 @@ jobs:
       - name: Build with analyzers
         run: dotnet build SysmacXmlViewer.sln -c Release --no-restore /warnaserror -p:EnableNETAnalyzers=true -p:AnalysisMode=Minimum -p:AnalysisLevel=latest -p:WarningsNotAsErrors=CA1822%3BCA1845%3BCA1847%3BCA1854%3BCA1861%3BCA1862%3BCA1866%3BCA1872
 
+      - name: Test
+        run: dotnet test SysmacXmlViewer.sln -c Release --no-build --verbosity normal
+
       - name: Publish single-file executable
         run: dotnet publish SysmacXmlViewer\SysmacXmlViewer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --no-restore -o artifacts\publish
 

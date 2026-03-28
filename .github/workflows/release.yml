@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - "v*"
+      - "V*"
+      - "Ver.*"
 
 permissions:
   contents: write
@@ -23,6 +25,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -35,11 +39,32 @@ jobs:
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
-          if ($tag -notmatch '^v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$') {
-            throw "Tag must look like v1.2.3 or v1.2.3-rc.1."
+
+          $patterns = @(
+            '^v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$',
+            '^V(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$',
+            '^V\.(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$',
+            '^Ver\.(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$'
+          )
+
+          $version = $null
+          foreach ($pattern in $patterns) {
+            if ($tag -match $pattern) {
+              $version = $Matches.version
+              break
+            }
           }
 
-          $version = $Matches.version
+          if (-not $version) {
+            throw "Tag must look like v1.2.3, V1.2.3, V.1.2.3, or Ver.1.2.3."
+          }
+
+          [xml]$project = Get-Content "SysmacXmlViewer\SysmacXmlViewer.csproj"
+          $projectVersion = $project.Project.PropertyGroup.Version | Select-Object -First 1
+          if ($projectVersion -ne $version) {
+            throw "Tag version '$version' does not match project version '$projectVersion'."
+          }
+
           $fileVersion = (($version -replace '-.*$', '') + ".0")
 
           "APP_VERSION=$version" >> $env:GITHUB_ENV
