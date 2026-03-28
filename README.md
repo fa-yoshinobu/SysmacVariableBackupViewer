@@ -75,18 +75,14 @@ SysmacVariableBackupViewer is a Windows desktop application for viewing and anal
 ### Build Instructions
 
 ```bash
-# Clone repository
-git clone https://github.com/fa-yoshinobu/SysmacVariableBackupViewer.git
+# Run local CI checks
+ci.bat
 
-# Navigate to project directory
-cd SysmacVariableBackupViewer/SysmacXmlViewer
-
-# Build application
-dotnet build
-
-# Publish single-file executable
-dotnet publish -c Release -r win-x64 --self-contained true /p:PublishSingleFile=true
+# Build single-file executable
+build.bat
 ```
+
+Output: `artifacts\publish\SysmacVariableBackupViewer.exe`
 
 ### Project Structure
 
