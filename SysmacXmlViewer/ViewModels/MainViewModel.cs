@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -28,7 +29,7 @@ namespace SysmacXmlViewer.ViewModels
         private List<VariableItem> _allVariables = new();
 
         // 高速化のためのキャッシュ
-        private Dictionary<string, string> _dataTypeCache = new();
+        private readonly ConcurrentDictionary<string, string> _dataTypeCache = new();
         private List<VariableItem> _cachedFilteredList = new();
         private readonly object _filterLock = new();
         private bool _pendingFilterRequest = false;
@@ -183,25 +184,9 @@ namespace SysmacXmlViewer.ViewModels
 
         private string NormalizeDataType(string dataType)
         {
-            // キャッシュを使用して高速化
-            if (_dataTypeCache.TryGetValue(dataType, out string? cachedResult))
-            {
-                return cachedResult;
-            }
-
-            string result;
-            // STRING[]型をすべてSTRINGに統一
-            if (dataType.StartsWith("STRING[") && dataType.EndsWith("]"))
-            {
-                result = "STRING";
-            }
-            else
-            {
-                result = dataType;
-            }
-
-            _dataTypeCache[dataType] = result;
-            return result;
+            return _dataTypeCache.GetOrAdd(
+                dataType,
+                static key => key.StartsWith("STRING[") && key.EndsWith(']') ? "STRING" : key);
         }
 
         private void ExportCsv()
