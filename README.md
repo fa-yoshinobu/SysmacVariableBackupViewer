@@ -2,8 +2,7 @@
 
 [![Release](https://img.shields.io/github/v/release/fa-yoshinobu/SysmacVariableBackupViewer?display_name=tag)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/fa-yoshinobu/SysmacVariableBackupViewer/ci.yml?branch=main&label=CI)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/actions/workflows/ci.yml)
-[![Auto Release](https://img.shields.io/github/actions/workflow/status/fa-yoshinobu/SysmacVariableBackupViewer/release.yml?label=Auto%20Release)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/actions/workflows/release.yml)
-[![License](https://img.shields.io/github/license/fa-yoshinobu/SysmacVariableBackupViewer)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
 
 
@@ -86,7 +85,7 @@ Output: `artifacts\publish\SysmacVariableBackupViewer.exe`
 
 ### License
 
-This software is provided "as is" without warranty. See LICENSE.txt for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
 ### Author
 
@@ -170,7 +169,7 @@ build.bat
 
 ### ライセンス
 
-本ソフトウェアは「現状のまま」提供され、保証はありません。詳細はLICENSE.txtを参照してください。
+このプロジェクトは MIT License です。詳細は [LICENSE](LICENSE) を参照してください。
 
 ### 作者
 

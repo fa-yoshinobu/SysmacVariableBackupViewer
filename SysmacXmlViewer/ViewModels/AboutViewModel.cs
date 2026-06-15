@@ -39,7 +39,7 @@ namespace SysmacXmlViewer.ViewModels
             ProductName = "SysmacVariableBackupViewer";
             ProductVersion = "Unknown";
             CompanyName = "SysmacVariableBackupViewer";
-            Copyright = "Copyright (c) 2025";
+            Copyright = "Copyright (c) 2026 fa-yoshinobu";
             TargetFrameworkDisplay = $".NET {Environment.Version.Major}.0 Windows";
             Libraries = new List<LibraryInfo>();
             Author = "fa-yoshinobu";
@@ -188,34 +188,27 @@ https://github.com/dotnet/runtime/blob/main/LICENSE.TXT";
 
         private string GetApplicationLicense()
         {
-            return $@"SysmacVariableBackupViewer License Agreement
+            return @"MIT License
 
-Copyright (c) 2025 All rights reserved.
+Copyright (c) 2026 fa-yoshinobu
 
-This software is provided ""as is"" without warranty of any kind, either express
-or implied, including but not limited to the implied warranties of
-merchantability and fitness for a particular purpose.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the ""Software""), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-The author shall not be liable for any damages arising out of the use or
-inability to use this software, including but not limited to direct, indirect,
-incidental, special, exemplary, or consequential damages.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-This software is designed for viewing Sysmac Studio XML backup files and
-should be used in accordance with Omron's terms of service and licensing
-agreements.
-
-For technical support or licensing inquiries, please contact the developer.
-
-Version: {ProductVersion}
-Build Date: {BuildDate}
-
-Features:
-- XML backup file parsing and viewing
-- Variable data type conversion and display
-- Advanced filtering and search capabilities
-- CSV export functionality
-- High-performance data handling
-- Multi-language support";
+THE SOFTWARE IS PROVIDED ""AS IS"", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.";
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
