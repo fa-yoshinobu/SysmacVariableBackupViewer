@@ -4,6 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-10-27
+
 ### Changed
 
 - Standardized fixed-name Windows ZIP assets, ZIP SHA-256 checksums and English release notes.
