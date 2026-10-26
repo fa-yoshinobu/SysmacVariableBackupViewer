@@ -380,3 +380,7 @@ $RECYCLE.BIN/
 # JetBrains Rider
 .idea/
 *.sln.iml
+
+# Release tooling tests are source files, not build output.
+!/tests/release/
+!/tests/release/*.py
