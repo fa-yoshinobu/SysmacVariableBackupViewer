@@ -79,6 +79,29 @@ class VirusTotalTests(unittest.TestCase):
         self.assertNotIn(str(self.directory).encode(), upload)
         self.assertTrue(all(later[0] - earlier[0] >= 16 for earlier, later in zip(opener.calls, opener.calls[1:])))
 
+    def test_conflicting_upload_requests_reanalysis_of_exact_hash(self):
+        conflict = HTTPError(scanner.API, 409, "private detail", {}, io.BytesIO())
+        client, opener = self.client([conflict, {"data": {"id": "new-analysis"}}, analysis()])
+        report = client.scan(self.exe, 30)
+        self.assertEqual("completed", report["status"])
+        self.assertEqual(scanner.API + "/files/" + scanner.sha256_file(self.exe) + "/analyse",
+                         opener.calls[1][1].full_url)
+        self.assertIsNone(opener.calls[1][2])
+
+    def test_analysis_lookup_retries_temporary_not_found_without_reupload(self):
+        missing = HTTPError(scanner.API, 404, "private detail", {}, io.BytesIO())
+        client, opener = self.client([{"data": {"id": "new-analysis"}}, missing, analysis()])
+        self.assertEqual("completed", client.scan(self.exe, 30)["status"])
+        self.assertEqual(1, sum(req.method == "POST" for _, req, _ in opener.calls))
+        self.assertGreaterEqual(opener.calls[2][0] - opener.calls[1][0], 60)
+
+    def test_persistent_analysis_not_found_is_not_success(self):
+        responses = [{"data": {"id": "new-analysis"}}] + [
+            HTTPError(scanner.API, 404, "private detail", {}, io.BytesIO()) for _ in range(3)]
+        client, _ = self.client(responses)
+        with self.assertRaisesRegex(scanner.ScanError, "analysis lookup failed .*404"):
+            client.scan(self.exe, 30)
+
     def test_large_file_uses_one_time_upload_url(self):
         endpoint = "https://bigfiles.virustotal.com/upload/example"
         client, opener = self.client([{"data": endpoint}, {"data": {"id": "123"}}, analysis()])
