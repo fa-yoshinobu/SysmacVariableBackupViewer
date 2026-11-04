@@ -183,46 +183,14 @@ namespace SysmacXmlViewer.Services
             {
                 if (long.TryParse(rawValue, out long nanoseconds))
                 {
-                    // 負の値の処理（long.MinValueの特殊ケースを考慮）
-                    bool isNegative;
-                    long absNanoseconds;
-
-                    if (nanoseconds == long.MinValue)
-                    {
-                        // long.MinValueの場合は、直接計算で処理
-                        absNanoseconds = long.MaxValue;
-                        // 1を加算（オーバーフローを避けるため、計算を分離）
-                        absNanoseconds = unchecked(absNanoseconds + 1L);
-                        // long.MinValueの場合は必ず負の値として扱う
-                        isNegative = true;
-
-                        // absNanosecondsが負の値の場合は正の値に修正
-                        if (absNanoseconds < 0)
-                        {
-                            absNanoseconds = Math.Abs(absNanoseconds);
-                        }
-                    }
-                    else
-                    {
-                        isNegative = nanoseconds < 0;
-                        absNanoseconds = Math.Abs(nanoseconds);
-                    }
-
-                    // absNanosecondsが負の値の場合は正の値に修正
-                    if (absNanoseconds < 0)
-                    {
-                        absNanoseconds = Math.Abs(absNanoseconds);
-                    }
-
-                    // ナノ秒を秒に変換（大きな値に対応するためdoubleを使用）
-                    double totalSeconds = absNanoseconds / 1_000_000_000.0;
-
-                    // 日、時、分、秒、ミリ秒に分解
-                    long totalDays = (long)(totalSeconds / 86400);
-                    int hours = (int)((totalSeconds % 86400) / 3600);
-                    int minutes = (int)((totalSeconds % 3600) / 60);
-                    int seconds = (int)(totalSeconds % 60);
-                    double milliseconds = (totalSeconds * 1000) % 1000;
+                    bool isNegative = nanoseconds < 0;
+                    // Decimal can represent the magnitude of long.MinValue exactly.
+                    decimal magnitude = Math.Abs((decimal)nanoseconds);
+                    long totalDays = (long)(magnitude / 86_400_000_000_000m);
+                    int hours = (int)(magnitude / 3_600_000_000_000m % 24);
+                    int minutes = (int)(magnitude / 60_000_000_000m % 60);
+                    int seconds = (int)(magnitude / 1_000_000_000m % 60);
+                    decimal milliseconds = magnitude % 1_000_000_000m / 1_000_000m;
 
                     // 時間形式で表示（例: -106751d23h47m16s854.775ms）
                     var parts = new List<string>();
@@ -248,7 +216,7 @@ namespace SysmacXmlViewer.Services
                     {
                         parts.Add($"{seconds}s");
                     }
-                    parts.Add($"{milliseconds:F3}ms");
+                    parts.Add(milliseconds.ToString("0.000###", CultureInfo.InvariantCulture) + "ms");
 
                     string result = string.Join("", parts);
                     return result;
@@ -838,7 +806,7 @@ namespace SysmacXmlViewer.Services
                     if (bytesLE.Length >= 4)
                     {
                         float v = BitConverter.ToSingle(bytesLE, 0);
-                        return v.ToString("F6", CultureInfo.InvariantCulture);
+                        return v.ToString("R", CultureInfo.InvariantCulture);
                     }
                 }
                 // まず、16進数文字列として解析を試行
@@ -864,14 +832,14 @@ namespace SysmacXmlViewer.Services
                     {
                         // リトルエンディアンで32ビット浮動小数点として解釈
                         float floatValue = BitConverter.ToSingle(bytes, 0);
-                        return floatValue.ToString("F6", CultureInfo.InvariantCulture);
+                        return floatValue.ToString("R", CultureInfo.InvariantCulture);
                     }
                 }
 
                 // 16進数でない場合は、通常の数値として解析
                 if (float.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out float realValue))
                 {
-                    return realValue.ToString("F6", CultureInfo.InvariantCulture);
+                    return realValue.ToString("R", CultureInfo.InvariantCulture);
                 }
 
                 return rawValue;
@@ -894,7 +862,7 @@ namespace SysmacXmlViewer.Services
                     if (bytesLE.Length >= 8)
                     {
                         double v = BitConverter.ToDouble(bytesLE, 0);
-                        return v.ToString("F6", CultureInfo.InvariantCulture);
+                        return v.ToString("R", CultureInfo.InvariantCulture);
                     }
                 }
                 // まず、16進数文字列として解析を試行
@@ -922,14 +890,14 @@ namespace SysmacXmlViewer.Services
                     {
                         // リトルエンディアンで64ビット浮動小数点として解釈
                         double doubleValue = BitConverter.ToDouble(bytes, 0);
-                        return doubleValue.ToString("F6", CultureInfo.InvariantCulture);
+                        return doubleValue.ToString("R", CultureInfo.InvariantCulture);
                     }
                 }
 
                 // 16進数でない場合は、通常の数値として解析
                 if (double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out double lrealValue))
                 {
-                    return lrealValue.ToString("F6", CultureInfo.InvariantCulture);
+                    return lrealValue.ToString("R", CultureInfo.InvariantCulture);
                 }
 
                 return rawValue;

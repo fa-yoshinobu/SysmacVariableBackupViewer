@@ -8,11 +8,19 @@ Extract the ZIP file, then run `SysmacVariableBackupViewer.exe`.
 Requirements: Windows x64. The .NET runtime is included.
 
 ## Changes
+### Added
+- Load matching SMC2 projects to display POU names and variable, array element and member comments.
+- Filter by POU and inspect original identifiers, values and comment sources in a compact detail pane.
+
 ### Changed
-- Standardized Windows ZIP distribution, checksums and release documentation.
+- Compact English UI with loading status, explicit Global scope and raw identifiers before project loading.
+- Updated application icon and standardized application error messages in English.
 
 ### Fixed
-- Wait for VirusTotal analysis to complete and preserve unrelated release notes when updating scan results.
+- Preserve REAL/LREAL precision and extreme TIME values.
+- Correct array indexes, global variable names, comment matching and native multi-cell copying.
+- Prevent stale filter results and reject incomplete backup XML.
+- Accept supported release tag prefixes consistently.
 
 <!-- virustotal:start -->
 {{VIRUSTOTAL_CONTENT}}

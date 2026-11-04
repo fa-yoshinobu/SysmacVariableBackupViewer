@@ -8,7 +8,7 @@ namespace SysmacXmlViewer.Tests
     public class XmlParserTests
     {
         private const string SampleXml = @"<?xml version=""1.0"" encoding=""utf-8""?>
-<Root>
+<Content>
   <Header>
     <Project ID=""{123}"" Name=""TestProject"" Tracking=""1"">
       <DeviceType>NJ501</DeviceType>
@@ -28,7 +28,35 @@ namespace SysmacXmlViewer.Tests
       </Item>
     </RetainVariable>
   </Body>
-</Root>";
+</Content>";
+
+        [Theory]
+        [InlineData("<unrelated/>")]
+        [InlineData("<Content/>")]
+        [InlineData("<Content><Header><Project/></Header></Content>")]
+        [InlineData("<Content><Header><Project/></Header><Body><RetainVariable><Item/></RetainVariable></Body></Content>")]
+        public void RejectsNonBackupOrIncompleteXml(string xml)
+        {
+            var file = Path.GetTempFileName();
+            try
+            {
+                File.WriteAllText(file, xml);
+                Assert.Throws<XmlParseException>(() => new XmlParser().ParseXmlFile(file));
+            }
+            finally { File.Delete(file); }
+        }
+
+        [Fact]
+        public void AllowsAnEmptyRetainVariableSection()
+        {
+            var file = Path.GetTempFileName();
+            try
+            {
+                File.WriteAllText(file, "<Content><Header><Project/></Header><Body><RetainVariable/></Body></Content>");
+                Assert.Empty(new XmlParser().ParseXmlFile(file).Variables);
+            }
+            finally { File.Delete(file); }
+        }
 
         [Fact]
         public void ParseXmlFile_ValidXml_ReturnsCorrectData()

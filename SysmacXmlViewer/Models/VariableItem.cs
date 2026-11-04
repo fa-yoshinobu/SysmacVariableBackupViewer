@@ -17,6 +17,57 @@ namespace SysmacXmlViewer.Models
         private string _displayName = string.Empty;
         private string _groupName = string.Empty;
 
+        private string _pouName = string.Empty;
+        private string _comment = string.Empty;
+
+        public string PouName
+        {
+            get => _pouName;
+            set => SetProperty(ref _pouName, value);
+        }
+
+        public string Comment
+        {
+            get => _comment;
+            set => SetProperty(ref _comment, value);
+        }
+
+        private string _commentSource = "Project not loaded";
+        public string CommentSource
+        {
+            get => _commentSource;
+            set => SetProperty(ref _commentSource, value);
+        }
+
+        private string BackupVariablePath => Name.StartsWith("VAR:/", StringComparison.OrdinalIgnoreCase)
+            ? Name[5..].TrimStart('/') : Name;
+
+        public bool IsLocalVariable
+        {
+            get
+            {
+                var path = BackupVariablePath;
+                var slash = path.IndexOf('/');
+                return Name.StartsWith("VAR://", StringComparison.OrdinalIgnoreCase)
+                    && slash > 0 && Guid.TryParse(path[..slash], out _);
+            }
+        }
+        public string ScopeKey => IsLocalVariable ? BackupVariablePath.Split('/')[0] : "Global";
+        public string ScopeDisplay => IsLocalVariable ? PouName : "Global";
+        private bool _metadataApplied;
+        public bool MetadataApplied
+        {
+            get => _metadataApplied;
+            set
+            {
+                if (SetProperty(ref _metadataApplied, value))
+                    OnPropertyChanged(nameof(VariableNameDisplay));
+            }
+        }
+        public string VariableNameDisplay => MetadataApplied ? VariablePath : Name;
+        public string VariablePath => IsLocalVariable
+            ? BackupVariablePath[(BackupVariablePath.IndexOf('/') + 1)..] : BackupVariablePath;
+
         // 高速化のためのキャッシュ
         private static readonly ConcurrentDictionary<string, string> _convertedValueCache = new();
         private static readonly ConcurrentDictionary<string, bool> _isStringArrayCache = new();
@@ -61,7 +112,7 @@ namespace SysmacXmlViewer.Models
         }
 
         // 配列型変数かどうか
-        public bool IsArray => Name.Contains("[") || IsStringArray;
+        public bool IsArray => Name.Contains('[');
 
         // 階層型変数かどうか
         public bool IsHierarchical => Name.Contains("/");
@@ -95,17 +146,8 @@ namespace SysmacXmlViewer.Models
                     return cachedResult;
                 }
 
-                string result;
-                if (IsStringArray)
-                {
-                    var match = Regex.Match(DataType, @"STRING\[(\d+)\]");
-                    result = match.Success ? match.Groups[1].Value : string.Empty;
-                }
-                else
-                {
-                    var arrayMatch = Regex.Match(Name, @"\[(\d+)\]");
-                    result = arrayMatch.Success ? arrayMatch.Groups[1].Value : string.Empty;
-                }
+                var indexes = Regex.Matches(Name, @"\[(-?\d+(?:\s*,\s*-?\d+)*)\]");
+                string result = string.Join(" / ", indexes.Cast<Match>().Select(m => m.Groups[1].Value));
 
                 _arrayIndexCache.TryAdd(cacheKey, result);
                 return result;

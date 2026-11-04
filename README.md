@@ -45,11 +45,17 @@ SysmacVariableBackupViewer is a Windows desktop application for viewing and anal
 ### Usage
 
 1. **Launch Application**: Run `SysmacVariableBackupViewer.exe`
-2. **Load File**: Click "Load File" button and select XML backup file
+2. **Open Backup XML**: Click "Open Backup XML" button and select XML backup file
 3. **View Data**: Variable information is displayed in the main table
 4. **Filter Data**: Use text search and data type filters
 5. **Export**: Click "Export CSV" to save filtered data
 6. **About**: Access Help menu → About for application information
+
+### POU names and variable comments
+
+After loading a backup XML, select **Load POU Names & Comments** and choose its Sysmac Studio project. The device tracking ID must match. Program IDs are replaced with POU names in the display; the original backup names and values are preserved. Load the project again after switching backups.
+
+The **Comment** column shows local/global variable comments, array element comments, and available structure/FB member comments. Parent and member comments are separated by ` / `. Comments are searchable and included in CSV exports together with the POU name. Before loading a project, variable names show the original backup identifiers. Global variables display Global in the POU column; unmatched local POUs leave that column blank, with their original IDs available in the detail pane and POU filter. Missing comments remain blank. The project summary reports resolution and comment counts. Use the POU filter to select a scope. Select a cell to inspect the full comment, comment source, original identifier, raw value, offset and array index in the resizable detail pane. The status bar shows loading, matching and filtering activity. Matching IDs do not guarantee identical program revisions.
 
 ### Displayed Information
 
@@ -129,11 +135,17 @@ SysmacVariableBackupViewerは、Sysmac StudioのXMLバックアップファイ�
 ### 使用方法
 
 1. **アプリケーション起動**: `SysmacVariableBackupViewer.exe`を実行
-2. **ファイル読み込み**: 「Load File」ボタンをクリックしてXMLバックアップファイルを選択
+2. **ファイル読み込み**: 「Open Backup XML」ボタンをクリックしてXMLバックアップファイルを選択
 3. **データ表示**: メインテーブルに変数情報が表示されます
 4. **データフィルタリング**: テキスト検索とデータ型フィルタを使用
 5. **エクスポート**: 「Export CSV」をクリックしてフィルタリングされたデータを保存
 6. **About**: ヘルプメニュー→Aboutでアプリケーション情報を確認
+
+### POU 名と変数コメント
+
+バックアップ XML を開いた後、**Load POU Names & Comments** から対応する Sysmac Studio プロジェクトを選択します。機器の Tracking ID が一致する場合に、表示上のプログラム ID を POU 名に置き換えます。元のバックアップ変数名と値は保持します。別の XML を開いた場合は、プロジェクトを再選択してください。
+
+**Comment** 列には、ローカル・グローバル変数、配列要素、および取得できる構造体・FB メンバーのコメントを表示します。親とメンバーのコメントは ` / ` で区切ります。コメント検索と、POU 名・コメントを含む CSV 出力に対応します。プロジェクト未読込時は元の識別子を変数名に表示します。グローバル変数の POU 列は Global、未解決のローカル POU 列は空欄とし、元の ID は詳細欄と POU フィルターで確認できます。コメントがない場合は空欄を表示します。プロジェクト概要で対応件数を確認できます。POU フィルターで所属を絞り込めます。セルを選択すると、サイズ変更可能な詳細欄にコメント全文・出所、元の識別子、Raw Value、Offset、配列インデックスを表示します。ステータスバーには読み込み・照合・絞り込みの状況を英語で表示します。ID の一致はプログラムの版の一致を保証しません。
 
 ### 表示される情報
 

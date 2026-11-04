@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Input;
 using System.Threading.Tasks;
+using System.Threading;
 using Microsoft.Win32;
 using SysmacXmlViewer.Commands;
 using SysmacXmlViewer.Models;
@@ -27,13 +28,59 @@ namespace SysmacXmlViewer.ViewModels
         private string _currentFilePath = string.Empty;
         private ProjectInfo _projectInfo = new();
         private List<VariableItem> _allVariables = new();
+        private bool _isLoading;
+        private string _metadataStatus = "Load a backup, then load its SMC2 project for POU names and comments.";
+        public string MetadataStatus
+        {
+            get => _metadataStatus;
+            private set => SetProperty(ref _metadataStatus, value);
+        }
+
+        public sealed record PouFilter(string Key, string Label);
+        public ObservableCollection<PouFilter> AvailablePous { get; } = new() { new("", "All") };
+        private PouFilter? _selectedPou;
+        public PouFilter? SelectedPou
+        {
+            get => _selectedPou;
+            set { if (SetProperty(ref _selectedPou, value)) _ = ApplyFiltersAsync(); }
+        }
+        private VariableItem? _selectedVariable;
+        public VariableItem? SelectedVariable
+        {
+            get => _selectedVariable;
+            set => SetProperty(ref _selectedVariable, value);
+        }
+        private string _currentProjectPath = "";
+        public string CurrentProjectPath
+        {
+            get => _currentProjectPath;
+            private set => SetProperty(ref _currentProjectPath, value);
+        }
+        private bool _isFiltering;
+        private string _operation = "Ready";
+        public bool IsBusy => _isLoading || _isFiltering;
+        public string ActivityStatus => _isLoading ? _operation : _isFiltering ? "Filtering variables..." : "Ready";
+        private void NotifyActivity()
+        {
+            OnPropertyChanged(nameof(IsBusy));
+            OnPropertyChanged(nameof(ActivityStatus));
+            CommandManager.InvalidateRequerySuggested();
+        }
+        private void UpdatePous()
+        {
+            var key = SelectedPou?.Key;
+            AvailablePous.Clear();
+            AvailablePous.Add(new("", "All"));
+            foreach (var group in _allVariables.GroupBy(v => v.ScopeKey).OrderBy(g => g.First().ScopeDisplay))
+                AvailablePous.Add(new(group.Key, group.Key == "Global" ? "Global"
+                    : group.First().PouName.Length > 0 ? group.First().PouName : group.Key));
+            SelectedPou = AvailablePous.FirstOrDefault(p => p.Key == key) ?? AvailablePous[0];
+        }
 
         // 高速化のためのキャッシュ
         private readonly ConcurrentDictionary<string, string> _dataTypeCache = new();
-        private List<VariableItem> _cachedFilteredList = new();
-        private readonly object _filterLock = new();
-        private bool _pendingFilterRequest = false;
-        private bool _isFiltering = false;
+        private CancellationTokenSource? _filterCancellation;
+        private int _filterVersion;
 
         public MainViewModel()
         {
@@ -41,8 +88,10 @@ namespace SysmacXmlViewer.ViewModels
             _csvExporter = new CsvExporter();
             _xmlWriter = new XmlWriter();
 
-            LoadFileCommand = new RelayCommand(LoadFile);
-            ExportCsvCommand = new RelayCommand(ExportCsv);
+            LoadFileCommand = new RelayCommand(LoadFile, () => !_isLoading);
+            LoadProjectCommand = new RelayCommand(LoadProject, () => !_isLoading && _allVariables.Count > 0);
+            ExportCsvCommand = new RelayCommand(ExportCsv, () => !IsBusy && FilteredVariables.Count > 0);
+            _selectedPou = AvailablePous[0];
             ClearFiltersCommand = new RelayCommand(ClearFilters);
 
             AvailableDataTypes = new ObservableCollection<string>();
@@ -99,6 +148,7 @@ namespace SysmacXmlViewer.ViewModels
         public int FilteredVariablesCount => FilteredVariables.Count;
 
         public ICommand LoadFileCommand { get; }
+        public ICommand LoadProjectCommand { get; }
         public ICommand ExportCsvCommand { get; }
         public ICommand ClearFiltersCommand { get; }
 
@@ -114,15 +164,20 @@ namespace SysmacXmlViewer.ViewModels
             {
                 try
                 {
-                    // メモリクリア
-                    ClearMemory();
+                    _isLoading = true;
+                    _operation = "Loading backup XML...";
+                    NotifyActivity();
 
                     // 非同期でファイル読み込み
                     var data = await Task.Run(() => _xmlParser.ParseXmlFile(openFileDialog.FileName));
 
+                    ClearMemory();
+                    MetadataStatus = "Load the matching SMC2 project for POU names and comments.";
                     _allVariables = data.Variables;
                     ProjectInfo = data.ProjectInfo;
                     CurrentFilePath = openFileDialog.FileName;
+                    CurrentProjectPath = "";
+                    UpdatePous();
 
                     // データ型リストを更新（STRING[]型を統一）
                     await UpdateAvailableDataTypesAsync(data);
@@ -131,9 +186,63 @@ namespace SysmacXmlViewer.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Failed to load file: {ex.Message}", "Error",
+                    System.Windows.MessageBox.Show($"Failed to load file: {SysmacXmlViewer.Services.ErrorMessages.Describe(ex)}", "Error",
                         System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
+                finally
+                {
+                    _isLoading = false;
+                    NotifyActivity();
+                }
+            }
+        }
+
+        private async void LoadProject()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "Sysmac Studio projects (*.smc2)|*.smc2",
+                Title = "Select matching Sysmac Studio project"
+            };
+            if (dialog.ShowDialog() != true) return;
+            try
+            {
+                _isLoading = true;
+                _operation = "Loading project and matching names & comments...";
+                NotifyActivity();
+                var original = _allVariables;
+                var tracking = ProjectInfo.Tracking;
+                var mapped = await Task.Run(() =>
+                {
+                    var metadata = SmcProjectMetadata.Load(dialog.FileName, tracking);
+                    var copy = original.Select(v => new VariableItem
+                    {
+                        Name = v.Name,
+                        DataType = v.DataType,
+                        Offset = v.Offset,
+                        Value = v.Value
+                    }).ToList();
+                    metadata.Apply(copy);
+                    return copy;
+                });
+                _allVariables = mapped;
+                CurrentProjectPath = dialog.FileName;
+                UpdatePous();
+                var local = _allVariables.Count(v => v.IsLocalVariable);
+                var resolved = _allVariables.Count(v => v.PouName.Length > 0);
+                var comments = _allVariables.Count(v => v.Comment.Length > 0);
+                MetadataStatus = $"{Path.GetFileName(dialog.FileName)} | POU resolved: {resolved}/{local} | Comments: {comments}/{_allVariables.Count}";
+                await ApplyFiltersAsync();
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"Failed to load project: {SysmacXmlViewer.Services.ErrorMessages.Describe(ex)}", "Error",
+                    System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isLoading = false;
+                NotifyActivity();
             }
         }
 
@@ -144,42 +253,25 @@ namespace SysmacXmlViewer.ViewModels
             Services.DataTypeConverter.ClearCache();
 
             // コレクションをクリア
-            _allVariables.Clear();
+            _filterCancellation?.Cancel();
+            _filterVersion++;
+            _allVariables = new();
             FilteredVariables.Clear();
+            SelectedVariable = null;
             AvailableDataTypes.Clear();
             _dataTypeCache.Clear();
-            _cachedFilteredList.Clear();
 
-            lock (_filterLock)
-            {
-                _pendingFilterRequest = false;
-                _isFiltering = false;
-            }
-
-            // ガベージコレクションを強制実行
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
         }
 
-        private async Task UpdateAvailableDataTypesAsync(XmlBackupData data)
+        private Task UpdateAvailableDataTypesAsync(XmlBackupData data)
         {
-            var dataTypes = await Task.Run(() =>
-                data.VariablesByType.Keys
-                    .Select(NormalizeDataType)
-                    .Distinct()
-                    .OrderBy(x => x)
-                    .ToList()
-            );
-
-            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                AvailableDataTypes.Clear();
-                AvailableDataTypes.Add("All");
-                foreach (var dt in dataTypes)
-                {
-                    AvailableDataTypes.Add(dt);
-                }
-            });
+            var selected = SelectedDataType;
+            AvailableDataTypes.Clear();
+            AvailableDataTypes.Add("All");
+            foreach (var type in data.VariablesByType.Keys.Select(NormalizeDataType).Distinct().OrderBy(x => x))
+                AvailableDataTypes.Add(type);
+            SelectedDataType = AvailableDataTypes.Contains(selected) ? selected : "All";
+            return Task.CompletedTask;
         }
 
         private string NormalizeDataType(string dataType)
@@ -215,7 +307,7 @@ namespace SysmacXmlViewer.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    System.Windows.MessageBox.Show($"Failed to export CSV file: {ex.Message}", "Error",
+                    System.Windows.MessageBox.Show($"Failed to export CSV file: {SysmacXmlViewer.Services.ErrorMessages.Describe(ex)}", "Error",
                         System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
                 }
             }
@@ -225,95 +317,64 @@ namespace SysmacXmlViewer.ViewModels
         {
             FilterText = string.Empty;
             SelectedDataType = "All";
+            SelectedPou = AvailablePous[0];
         }
 
         private async Task ApplyFiltersAsync()
         {
-            lock (_filterLock)
+            _filterCancellation?.Cancel();
+            using var cancellation = new CancellationTokenSource();
+            _filterCancellation = cancellation;
+            var version = ++_filterVersion;
+            // Lists are replaced on load, never cleared while a worker is reading them.
+            var variables = _allVariables;
+            var text = FilterText;
+            var dataType = SelectedDataType;
+            var pou = SelectedPou?.Key ?? "";
+            _isFiltering = true;
+            NotifyActivity();
+            try
             {
-                if (_isFiltering)
-                {
-                    _pendingFilterRequest = true;
-                    return;
-                }
-
-                _isFiltering = true;
+                var filtered = await Task.Run(() => ApplyFiltersInternal(variables, text, dataType, pou, cancellation.Token));
+                if (version != _filterVersion || cancellation.IsCancellationRequested) return;
+                var selectedName = SelectedVariable?.Name;
+                FilteredVariables = new ObservableCollection<VariableItem>(filtered);
+                SelectedVariable = filtered.FirstOrDefault(v => v.Name == selectedName);
+                OnPropertyChanged(nameof(TotalVariables));
+                OnPropertyChanged(nameof(FilteredVariablesCount));
             }
-
-            while (true)
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
             {
-                List<VariableItem> filtered;
-
-                try
+                // A newer filter or backup owns the displayed results.
+            }
+            finally
+            {
+                if (ReferenceEquals(_filterCancellation, cancellation))
                 {
-                    filtered = await Task.Run(() => ApplyFiltersInternal());
-                }
-                catch
-                {
-                    lock (_filterLock)
-                    {
-                        _isFiltering = false;
-                        _pendingFilterRequest = false;
-                    }
-                    throw;
-                }
-
-                await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-                {
-                    FilteredVariables.Clear();
-                    foreach (var variable in filtered)
-                    {
-                        FilteredVariables.Add(variable);
-                    }
-
-                    OnPropertyChanged(nameof(TotalVariables));
-                    OnPropertyChanged(nameof(FilteredVariablesCount));
-                });
-
-                bool shouldRepeat;
-                lock (_filterLock)
-                {
-                    if (_pendingFilterRequest)
-                    {
-                        _pendingFilterRequest = false;
-                        shouldRepeat = true;
-                    }
-                    else
-                    {
-                        _isFiltering = false;
-                        shouldRepeat = false;
-                    }
-                }
-
-                if (!shouldRepeat)
-                {
-                    break;
+                    _filterCancellation = null;
+                    _isFiltering = false;
+                    NotifyActivity();
                 }
             }
         }
 
-        private List<VariableItem> ApplyFiltersInternal()
+        private List<VariableItem> ApplyFiltersInternal(List<VariableItem> variables, string text,
+            string dataType, string pou, CancellationToken cancellation)
         {
-            var filtered = _allVariables.AsEnumerable();
-
-            // 検索テキストでフィルタ（大文字小文字を区別しない比較を最適化）
-            if (!string.IsNullOrWhiteSpace(FilterText))
+            var result = new List<VariableItem>();
+            foreach (var v in variables)
             {
-                var filterLower = FilterText.ToLowerInvariant();
-                filtered = filtered.Where(v =>
-                    v.Name.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
-                    v.DataType.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
-                    v.Value.Contains(filterLower, StringComparison.OrdinalIgnoreCase) ||
-                    v.DisplayName.Contains(filterLower, StringComparison.OrdinalIgnoreCase));
+                cancellation.ThrowIfCancellationRequested();
+                if (pou.Length > 0 && v.ScopeKey != pou) continue;
+                if (!string.IsNullOrWhiteSpace(text) &&
+                    !v.Name.Contains(text, StringComparison.OrdinalIgnoreCase) &&
+                    !v.DataType.Contains(text, StringComparison.OrdinalIgnoreCase) &&
+                    !v.Value.Contains(text, StringComparison.OrdinalIgnoreCase) &&
+                    !v.DisplayName.Contains(text, StringComparison.OrdinalIgnoreCase) &&
+                    !v.Comment.Contains(text, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!string.IsNullOrWhiteSpace(dataType) && dataType != "All" && NormalizeDataType(v.DataType) != dataType) continue;
+                result.Add(v);
             }
-
-            // データ型でフィルタ（STRING[]型を統一）
-            if (!string.IsNullOrWhiteSpace(SelectedDataType) && SelectedDataType != "All")
-            {
-                filtered = filtered.Where(v => NormalizeDataType(v.DataType) == SelectedDataType);
-            }
-
-            var result = filtered.ToList();
             return result;
         }
 

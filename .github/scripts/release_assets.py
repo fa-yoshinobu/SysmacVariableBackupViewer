@@ -15,7 +15,7 @@ END = "<!-- virustotal:end -->"
 def render_notes(template, repository, tag, asset_name, current_body=None):
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
         raise ValueError("Use an owner/repository name.")
-    if not re.fullmatch(r"v\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?", tag):
+    if not re.fullmatch(r"(?:v|V|V\.|Ver\.)\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?", tag):
         raise ValueError("Use a version tag such as v1.2.3.")
     block = "## Security scan\nVirusTotal scan pending."
     if current_body is not None and (START in current_body or END in current_body):

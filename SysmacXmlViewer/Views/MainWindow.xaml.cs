@@ -15,67 +15,11 @@ namespace SysmacXmlViewer.Views
             DataContext = new ViewModels.MainViewModel();
         }
 
-        private void DataGrid_KeyDown(object sender, KeyEventArgs e)
+        private void VariableGrid_CurrentCellChanged(object sender, EventArgs e)
         {
-            if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                // Ctrl+C で選択されたセルの内容をクリップボードにコピー
-                if (sender is DataGrid dataGrid)
-                {
-                    // 選択されたセルがある場合
-                    if (dataGrid.CurrentCell.Item != null)
-                    {
-                        var cellContent = dataGrid.CurrentCell.Column.GetCellContent(dataGrid.CurrentCell.Item);
-                        if (cellContent is TextBlock textBlock)
-                        {
-                            Clipboard.SetText(textBlock.Text);
-                        }
-                        else if (cellContent is TextBox textBox)
-                        {
-                            Clipboard.SetText(textBox.Text);
-                        }
-                        else if (cellContent is ContentPresenter contentPresenter)
-                        {
-                            // ContentPresenterの場合は子要素を探す
-                            var childTextBlock = FindVisualChild<TextBlock>(contentPresenter);
-                            if (childTextBlock != null)
-                            {
-                                Clipboard.SetText(childTextBlock.Text);
-                            }
-                        }
-                    }
-                    // 選択された行がある場合
-                    else if (dataGrid.SelectedItem != null)
-                    {
-                        var selectedItem = dataGrid.SelectedItem as Models.VariableItem;
-                        if (selectedItem != null)
-                        {
-                            // 選択された行の全データをコピー
-                            string rowData = $"{selectedItem.DisplayName}\t{selectedItem.DataTypeDisplayName}\t{selectedItem.Value}\t{selectedItem.ConvertedValueDisplay}\t{selectedItem.Offset}\t{selectedItem.GroupName}\t{selectedItem.ArrayIndex}";
-                            Clipboard.SetText(rowData);
-                        }
-                    }
-                    e.Handled = true;
-                }
-            }
-        }
-
-        private static T? FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T result)
-                {
-                    return result;
-                }
-                var descendant = FindVisualChild<T>(child);
-                if (descendant != null)
-                {
-                    return descendant;
-                }
-            }
-            return null;
+            if (DataContext is MainViewModel vm && sender is DataGrid grid
+                && grid.CurrentCell.Item is Models.VariableItem item)
+                vm.SelectedVariable = item;
         }
 
         private void AboutMenuItem_Click(object sender, RoutedEventArgs e)
@@ -88,7 +32,7 @@ namespace SysmacXmlViewer.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to open About window: {ex.Message}", "Error",
+                MessageBox.Show($"Failed to open About window: {SysmacXmlViewer.Services.ErrorMessages.Describe(ex)}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }

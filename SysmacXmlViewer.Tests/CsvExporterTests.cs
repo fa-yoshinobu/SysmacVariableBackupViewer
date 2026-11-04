@@ -19,15 +19,17 @@ public class CsvExporterTests
                     DataType = "STRING",
                     Value = "4869",
                     Offset = "0",
-                    GroupName = "Group,1"
+                    GroupName = "Group,1",
+                    PouName = "Demo",
+                    Comment = "Comment, \"quoted\""
                 }
             };
 
             new CsvExporter().ExportToCsv(variables, tempFile);
 
             var lines = File.ReadAllLines(tempFile);
-            Assert.Equal("Variable Name,Data Type,Value,Converted Value,Offset,Group Name,Array Index", lines[0]);
-            Assert.Equal("\"Name \"\"A\"\"\",\"STRING\",\"4869\",\"Hi\",\"0\",\"Group,1\",\"\"", lines[1]);
+            Assert.Equal("Variable Name,Data Type,Value,Converted Value,Offset,Group Name,Array Index,POU,Comment", lines[0]);
+            Assert.Equal("\"Name \"\"A\"\"\",\"STRING\",\"4869\",\"Hi\",\"0\",\"Group,1\",\"\",\"Demo\",\"Comment, \"\"quoted\"\"\"", lines[1]);
         }
         finally
         {

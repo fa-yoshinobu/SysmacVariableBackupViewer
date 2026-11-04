@@ -5,11 +5,11 @@ namespace SysmacXmlViewer.Tests;
 public class DataTypeConverterCharacterizationTests
 {
     [Theory]
-    [InlineData("REAL", "0000803F", "1.000000")]
-    [InlineData("REAL", "1.5", "1.500000")]
-    [InlineData("LREAL", "000000000000F03F", "1.000000")]
-    [InlineData("LREAL", "1.5", "1.500000")]
-    public void ConvertValueToString_FloatingPointValuesUseInvariantF6(string dataType, string rawValue, string expected)
+    [InlineData("REAL", "0000803F", "1")]
+    [InlineData("REAL", "1.5", "1.5")]
+    [InlineData("LREAL", "000000000000F03F", "1")]
+    [InlineData("LREAL", "1.5", "1.5")]
+    public void ConvertValueToString_FloatingPointValuesPreservePrecision(string dataType, string rawValue, string expected)
     {
         Assert.Equal(expected, DataTypeConverter.ConvertValueToString(dataType, rawValue));
     }

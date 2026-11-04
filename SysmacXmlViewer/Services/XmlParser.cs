@@ -17,20 +17,22 @@ namespace SysmacXmlViewer.Services
                 var doc = XDocument.Load(filePath);
                 var content = doc.Root;
 
-                if (content == null)
+                if (content == null || content.Name != "Content")
                 {
-                    throw new InvalidOperationException("XMLファイルのルート要素が見つかりません。");
+                    throw new InvalidOperationException("The Sysmac backup Content element is missing.");
                 }
 
                 // ヘッダー情報の解析
-                var header = content.Element("Header");
+                var header = content.Element("Header")
+                    ?? throw new InvalidOperationException("The Header element is missing.");
                 if (header != null)
                 {
                     data.ProjectInfo = ParseHeader(header);
                 }
 
                 // 変数情報の解析
-                var retainVariable = content.Element("Body")?.Element("RetainVariable");
+                var retainVariable = content.Element("Body")?.Element("RetainVariable")
+                    ?? throw new InvalidOperationException("The RetainVariable element is missing.");
                 if (retainVariable != null)
                 {
                     foreach (var item in retainVariable.Elements("Item"))
@@ -49,7 +51,7 @@ namespace SysmacXmlViewer.Services
             }
             catch (Exception ex)
             {
-                throw new XmlParseException($"XMLファイルの解析に失敗しました: {ex.Message}", ex);
+                throw new XmlParseException($"Failed to parse the XML file: {ErrorMessages.Describe(ex)}", ex);
             }
 
             return data;
@@ -60,7 +62,7 @@ namespace SysmacXmlViewer.Services
             var project = header.Element("Project");
             if (project == null)
             {
-                throw new InvalidOperationException("Project要素が見つかりません。");
+                throw new InvalidOperationException("The Project element is missing.");
             }
 
             return new ProjectInfo
@@ -80,6 +82,9 @@ namespace SysmacXmlViewer.Services
 
         private VariableItem ParseVariableItem(XElement item)
         {
+            if (string.IsNullOrWhiteSpace((string?)item.Attribute("Name")) ||
+                string.IsNullOrWhiteSpace((string?)item.Attribute("DataType")) || item.Element("Data") == null)
+                throw new InvalidOperationException("Each variable requires Name, DataType and Data.");
             var name = item.Attribute("Name")?.Value ?? string.Empty;
             var dataType = item.Attribute("DataType")?.Value ?? string.Empty;
             var rawValue = item.Element("Data")?.Value ?? string.Empty;
@@ -145,7 +150,7 @@ namespace SysmacXmlViewer.Services
             {
                 return parts[1]; // 最初の階層名をグループ名として使用
             }
-            return "その他";
+            return "Other";
         }
     }
 

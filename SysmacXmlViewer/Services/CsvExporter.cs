@@ -11,7 +11,7 @@ namespace SysmacXmlViewer.Services
             using var writer = new StreamWriter(filePath, false, System.Text.Encoding.UTF8);
 
             // ヘッダー行
-            writer.WriteLine("Variable Name,Data Type,Value,Converted Value,Offset,Group Name,Array Index");
+            writer.WriteLine("Variable Name,Data Type,Value,Converted Value,Offset,Group Name,Array Index,POU,Comment");
 
             // データ行
             foreach (var variable in variables)
@@ -23,7 +23,9 @@ namespace SysmacXmlViewer.Services
                     $"\"{EscapeCsv(variable.ConvertedValueDisplay)}\"," +
                     $"\"{EscapeCsv(variable.Offset)}\"," +
                     $"\"{EscapeCsv(variable.GroupName)}\"," +
-                    $"\"{EscapeCsv(variable.ArrayIndex)}\"");
+                    $"\"{EscapeCsv(variable.ArrayIndex)}\"," +
+                    $"\"{EscapeCsv(variable.PouName)}\"," +
+                    $"\"{EscapeCsv(variable.Comment)}\"");
             }
         }
 

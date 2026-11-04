@@ -52,6 +52,13 @@ class ReleaseAssetsTests(unittest.TestCase):
         self.assertIn(block, result)
         self.assertNotIn("{{", result)
 
+    def test_all_workflow_tag_prefixes_are_accepted_and_preserved(self):
+        template = "{{DOWNLOAD_URL}}\n" + assets.START + "\n{{VIRUSTOTAL_CONTENT}}\n" + assets.END
+        for tag in ["v1.2.3", "V1.2.3", "V.1.2.3", "Ver.1.2.3", "v1.2.3-rc.1"]:
+            with self.subTest(tag=tag):
+                result = assets.render_notes(template, "owner/repo", tag, "App-win-x64.zip")
+                self.assertIn("/download/" + tag + "/", result)
+
     def test_notes_reject_malformed_blocks_and_untranslated_text(self):
         for template in [assets.START, "日本語", "{{UNKNOWN}}"]:
             with self.subTest(template=template), self.assertRaises(ValueError):
