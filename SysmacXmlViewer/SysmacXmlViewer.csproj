@@ -2,7 +2,8 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <RuntimeFrameworkVersion>10.0.14</RuntimeFrameworkVersion>
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
 
@@ -41,10 +42,6 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Text.Encoding.CodePages" Version="8.0.0" />
-  </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="**/*.Designer.cs" />

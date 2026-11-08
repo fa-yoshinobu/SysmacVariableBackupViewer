@@ -3,7 +3,7 @@
 [![Release](https://img.shields.io/github/v/release/fa-yoshinobu/SysmacVariableBackupViewer?display_name=tag)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/fa-yoshinobu/SysmacVariableBackupViewer/ci.yml?branch=main&label=CI)](https://github.com/fa-yoshinobu/SysmacVariableBackupViewer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/8.0)
+[![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/download/dotnet/10.0)
 
 
 [English](#english) | [日本語](#japanese)
@@ -71,7 +71,7 @@ The **Comment** column shows local/global variable comments, array element comme
 
 ### Technical Specifications
 
-- **Framework**: .NET 8.0 WPF
+- **Framework**: .NET 10.0 WPF
 - **Architecture**: MVVM pattern
 - **Deployment**: Single-file executable
 - **Optimization**: ReadyToRun compilation, trimming enabled
@@ -161,7 +161,7 @@ SysmacVariableBackupViewerは、Sysmac StudioのXMLバックアップファイ�
 
 ### 技術仕様
 
-- **フレームワーク**: .NET 8.0 WPF
+- **フレームワーク**: .NET 10.0 WPF
 - **アーキテクチャ**: MVVMパターン
 - **配布形式**: 単一ファイル実行形式
 - **最適化**: ReadyToRunコンパイル、トリミング有効

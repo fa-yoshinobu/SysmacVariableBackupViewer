@@ -9,13 +9,13 @@ dotnet restore
 if errorlevel 1 goto :error
 
 echo Publishing single-file executable...
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o "bin\Release\net8.0-windows\win-x64\publish"
+dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o "bin\Release\net10.0-windows\win-x64\publish"
 if errorlevel 1 goto :error
 
 echo.
 echo Build completed successfully.
-echo Output directory: bin\Release\net8.0-windows\win-x64\publish
-dir "bin\Release\net8.0-windows\win-x64\publish\*.exe" /-c
+echo Output directory: bin\Release\net10.0-windows\win-x64\publish
+dir "bin\Release\net10.0-windows\win-x64\publish\*.exe" /-c
 
 popd
 exit /b 0
