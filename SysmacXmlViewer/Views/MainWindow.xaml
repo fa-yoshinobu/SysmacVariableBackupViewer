@@ -2,11 +2,25 @@
  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
  Title="SysmacVariableBackupViewer" Height="800" Width="1200" MinHeight="680" MinWidth="900"
- WindowStartupLocation="CenterScreen" FontFamily="Segoe UI, Yu Gothic UI">
+ WindowStartupLocation="CenterScreen" FontFamily="Segoe UI, Yu Gothic UI"
+ Background="{StaticResource WindowBackgroundBrush}" Foreground="{StaticResource TextPrimaryBrush}">
  <Window.Resources>
   <BooleanToVisibilityConverter x:Key="BoolVisibility"/>
-  <Style TargetType="Button"><Setter Property="Padding" Value="10,4"/><Setter Property="Margin" Value="0,0,8,0"/></Style>
-  <Style x:Key="CellText" TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="6,0"/></Style>
+  <Style TargetType="Button" BasedOn="{StaticResource {x:Type Button}}"><Setter Property="Margin" Value="0,0,8,0"/></Style>
+  <Style x:Key="PrimaryToolbarButton" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}"><Setter Property="Margin" Value="0,0,8,0"/></Style>
+  <Style x:Key="FieldLabel" TargetType="TextBlock"><Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/></Style>
+  <Style x:Key="FieldLabelControl" TargetType="Label"><Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/></Style>
+  <Style x:Key="CellTextBase" TargetType="TextBlock"><Setter Property="TextTrimming" Value="CharacterEllipsis"/><Setter Property="VerticalAlignment" Value="Center"/><Setter Property="Margin" Value="6,0"/></Style>
+  <Style x:Key="CellText" TargetType="TextBlock" BasedOn="{StaticResource CellTextBase}"/>
+  <Style x:Key="IdentifierCellText" TargetType="TextBlock" BasedOn="{StaticResource CellTextBase}"><Setter Property="Foreground" Value="{StaticResource IdentifierBrush}"/></Style>
+  <Style x:Key="DataTypeCellText" TargetType="TextBlock" BasedOn="{StaticResource CellTextBase}"><Setter Property="Foreground" Value="{StaticResource DataTypeBrush}"/><Setter Property="FontFamily" Value="Consolas"/></Style>
+  <Style x:Key="ValueCellText" TargetType="TextBlock" BasedOn="{StaticResource CellTextBase}"><Setter Property="FontFamily" Value="Consolas"/>
+   <Style.Triggers>
+    <Trigger Property="Text" Value="True"><Setter Property="Foreground" Value="{StaticResource TrueValueBrush}"/><Setter Property="FontWeight" Value="SemiBold"/></Trigger>
+    <Trigger Property="Text" Value="False"><Setter Property="Foreground" Value="{StaticResource FalseValueBrush}"/></Trigger>
+   </Style.Triggers>
+  </Style>
+  <Style x:Key="MutedCellText" TargetType="TextBlock" BasedOn="{StaticResource CellTextBase}"><Setter Property="Foreground" Value="{StaticResource TextSecondaryBrush}"/></Style>
   <Style x:Key="DetailText" TargetType="TextBox"><Setter Property="IsReadOnly" Value="True"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Background" Value="Transparent"/><Setter Property="TextWrapping" Value="Wrap"/><Setter Property="VerticalScrollBarVisibility" Value="Auto"/></Style>
  </Window.Resources>
  <DockPanel>
@@ -18,57 +32,57 @@
   <Grid Margin="10,6,10,6">
    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*" MinHeight="100"/><RowDefinition Height="6"/><RowDefinition Height="90" MinHeight="80"/></Grid.RowDefinitions>
    <DockPanel>
-    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0"><Button Content="Open Backup XML" Command="{Binding LoadFileCommand}"/><Button Content="Load POU Names &amp; Comments" Command="{Binding LoadProjectCommand}"/><Button Content="Export CSV" Command="{Binding ExportCsvCommand}"/></StackPanel>
+    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0"><Button Content="Open Backup XML" Command="{Binding LoadFileCommand}" Style="{StaticResource PrimaryToolbarButton}"/><Button Content="Load POU Names &amp; Comments" Command="{Binding LoadProjectCommand}"/><Button Content="Export CSV" Command="{Binding ExportCsvCommand}"/></StackPanel>
     <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="65"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Grid.RowDefinitions><RowDefinition/><RowDefinition/></Grid.RowDefinitions>
-     <TextBlock Text="Backup:"/><TextBlock Grid.Column="1" Text="{Binding CurrentFilePath}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentFilePath}"/>
-     <TextBlock Grid.Row="1" Text="Project:"/><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentProjectPath}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentProjectPath}"/>
+     <TextBlock Text="Backup:" Style="{StaticResource FieldLabel}"/><TextBlock Grid.Column="1" Text="{Binding CurrentFilePath}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentFilePath}"/>
+     <TextBlock Grid.Row="1" Text="Project:" Style="{StaticResource FieldLabel}"/><TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding CurrentProjectPath}" TextTrimming="CharacterEllipsis" ToolTip="{Binding CurrentProjectPath}"/>
     </Grid>
    </DockPanel>
-   <Border Grid.Row="1" Background="#F3F5F8" Padding="6,3" Margin="0,5">
-    <StackPanel><WrapPanel><TextBlock Text="Project: " FontWeight="SemiBold"/><TextBlock Text="{Binding ProjectInfo.Name}" Margin="0,0,20,0"/><TextBlock Text="Device: " FontWeight="SemiBold"/><TextBlock Text="{Binding ProjectInfo.DeviceModelFull}" Margin="0,0,20,0"/><TextBlock Text="Version: " FontWeight="SemiBold"/><TextBlock Text="{Binding ProjectInfo.UnitVersion}"/></WrapPanel><TextBlock Text="{Binding MetadataStatus}" TextWrapping="Wrap" Foreground="#526174" Margin="0,1,0,0"/></StackPanel>
+   <Border Grid.Row="1" Background="{StaticResource InfoBackgroundBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="4" Padding="10,5" Margin="0,6">
+    <StackPanel><WrapPanel><TextBlock Text="Project: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding ProjectInfo.Name}" Margin="0,0,20,0"/><TextBlock Text="Device: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding ProjectInfo.DeviceModelFull}" Margin="0,0,20,0"/><TextBlock Text="Version: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding ProjectInfo.UnitVersion}"/></WrapPanel><TextBlock Text="{Binding MetadataStatus}" TextWrapping="Wrap" Foreground="{StaticResource TextSecondaryBrush}" Margin="0,1,0,0"/></StackPanel>
    </Border>
    <Grid Grid.Row="2" Margin="0,0,0,4">
     <Grid.ColumnDefinitions><ColumnDefinition Width="2*"/><ColumnDefinition Width="2*"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-    <DockPanel Margin="0,0,10,0"><Label Content="Search" Target="{Binding ElementName=SearchBox}" Padding="0,0,6,0" VerticalAlignment="Center"/><TextBox x:Name="SearchBox" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" ToolTip="Search names, comments, types and raw values"/></DockPanel>
-    <DockPanel Grid.Column="1" Margin="0,0,10,0"><Label Content="POU" Target="{Binding ElementName=PouBox}" Padding="0,0,6,0" VerticalAlignment="Center"/><ComboBox x:Name="PouBox" ItemsSource="{Binding AvailablePous}" DisplayMemberPath="Label" SelectedItem="{Binding SelectedPou}" Padding="4,2"/></DockPanel>
-    <DockPanel Grid.Column="2" Margin="0,0,10,0"><Label Content="Data Type" Target="{Binding ElementName=TypeBox}" Padding="0,0,6,0" VerticalAlignment="Center"/><ComboBox x:Name="TypeBox" ItemsSource="{Binding AvailableDataTypes}" SelectedItem="{Binding SelectedDataType}" Padding="4,2"/></DockPanel>
+    <DockPanel Margin="0,0,10,0"><Label Content="Search" Style="{StaticResource FieldLabelControl}" Target="{Binding ElementName=SearchBox}" Padding="0,0,6,0" VerticalAlignment="Center"/><TextBox x:Name="SearchBox" Text="{Binding FilterText, UpdateSourceTrigger=PropertyChanged}" Padding="4,2" ToolTip="Search names, comments, types and raw values"/></DockPanel>
+    <DockPanel Grid.Column="1" Margin="0,0,10,0"><Label Content="POU" Style="{StaticResource FieldLabelControl}" Target="{Binding ElementName=PouBox}" Padding="0,0,6,0" VerticalAlignment="Center"/><ComboBox x:Name="PouBox" ItemsSource="{Binding AvailablePous}" DisplayMemberPath="Label" SelectedItem="{Binding SelectedPou}" Padding="4,2"/></DockPanel>
+    <DockPanel Grid.Column="2" Margin="0,0,10,0"><Label Content="Data Type" Style="{StaticResource FieldLabelControl}" Target="{Binding ElementName=TypeBox}" Padding="0,0,6,0" VerticalAlignment="Center"/><ComboBox x:Name="TypeBox" ItemsSource="{Binding AvailableDataTypes}" SelectedItem="{Binding SelectedDataType}" Padding="4,2"/></DockPanel>
     <Button Grid.Column="3" Content="Clear Filters" Command="{Binding ClearFiltersCommand}" VerticalAlignment="Bottom" Margin="0"/>
    </Grid>
-   <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="Displayed: "/><TextBlock Text="{Binding FilteredVariablesCount}" FontWeight="SemiBold"/><TextBlock Text=" / "/><TextBlock Text="{Binding TotalVariables}"/></StackPanel>
+   <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="0,0,0,6"><TextBlock Text="Displayed: " Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding FilteredVariablesCount}" FontWeight="SemiBold"/><TextBlock Text=" / " Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding TotalVariables}" Style="{StaticResource FieldLabel}"/></StackPanel>
    <DataGrid Grid.Row="4" ItemsSource="{Binding FilteredVariables}" CurrentCellChanged="VariableGrid_CurrentCellChanged"
     AutoGenerateColumns="False" CanUserAddRows="False" IsReadOnly="True" RowHeight="30"
     SelectionMode="Extended" SelectionUnit="CellOrRowHeader" ClipboardCopyMode="ExcludeHeader"
-    HeadersVisibility="Column" GridLinesVisibility="Horizontal" AlternatingRowBackground="#F6F8FA"
+    HeadersVisibility="Column" GridLinesVisibility="Horizontal"
     EnableRowVirtualization="True" EnableColumnVirtualization="True" VirtualizingPanel.VirtualizationMode="Recycling">
     <DataGrid.Columns>
-     <DataGridTextColumn Header="POU" Binding="{Binding ScopeDisplay}" Width="1.2*" ElementStyle="{StaticResource CellText}"/>
-     <DataGridTextColumn Header="Variable Name" Binding="{Binding VariableNameDisplay}" Width="2*" ElementStyle="{StaticResource CellText}"/>
+     <DataGridTextColumn Header="POU" Binding="{Binding ScopeDisplay}" Width="1.2*" ElementStyle="{StaticResource MutedCellText}"/>
+     <DataGridTextColumn Header="Variable Name" Binding="{Binding VariableNameDisplay}" Width="2*" ElementStyle="{StaticResource IdentifierCellText}"/>
      <DataGridTextColumn Header="Comment" Binding="{Binding Comment}" Width="2.5*" ElementStyle="{StaticResource CellText}"/>
-     <DataGridTextColumn Header="Data Type" Binding="{Binding DataTypeDisplayName}" Width="*" ElementStyle="{StaticResource CellText}"/>
-     <DataGridTextColumn Header="Converted Value" Binding="{Binding ConvertedValueDisplay}" Width="1.5*" ElementStyle="{StaticResource CellText}"/>
+     <DataGridTextColumn Header="Data Type" Binding="{Binding DataTypeDisplayName}" Width="*" ElementStyle="{StaticResource DataTypeCellText}"/>
+     <DataGridTextColumn Header="Converted Value" Binding="{Binding ConvertedValueDisplay}" Width="1.5*" ElementStyle="{StaticResource ValueCellText}"/>
     </DataGrid.Columns>
    </DataGrid>
-   <GridSplitter Grid.Row="5" Height="6" HorizontalAlignment="Stretch" Background="#E5E9EF"/>
+   <GridSplitter Grid.Row="5" Height="6" HorizontalAlignment="Stretch" Background="Transparent"/>
    <GroupBox Grid.Row="6" Header="Selected Variable — select a cell to inspect" Padding="6,2">
     <Grid DataContext="{Binding SelectedVariable}">
      <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
      <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-     <TextBox Grid.ColumnSpan="2" Style="{StaticResource DetailText}" Text="{Binding Name}" ToolTip="Original identifier"/>
-     <WrapPanel Grid.Row="1"><TextBlock Text="POU: " FontWeight="SemiBold"/><TextBlock Text="{Binding ScopeDisplay}" Margin="0,0,12,0"/><TextBlock Text="Offset: " FontWeight="SemiBold"/><TextBlock Text="{Binding Offset}" Margin="0,0,12,0"/><TextBlock Text="Array Index: " FontWeight="SemiBold"/><TextBlock Text="{Binding ArrayIndex}"/></WrapPanel>
-     <WrapPanel Grid.Row="1" Grid.Column="1"><TextBlock Text="Comment Source: " FontWeight="SemiBold"/><TextBlock Text="{Binding CommentSource}"/></WrapPanel>
+     <TextBox Grid.ColumnSpan="2" Style="{StaticResource DetailText}" Text="{Binding Name}" ToolTip="Original identifier" Foreground="{StaticResource IdentifierBrush}" FontWeight="SemiBold"/>
+     <WrapPanel Grid.Row="1"><TextBlock Text="POU: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding ScopeDisplay}" Margin="0,0,12,0"/><TextBlock Text="Offset: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding Offset}" Margin="0,0,12,0"/><TextBlock Text="Array Index: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding ArrayIndex}"/></WrapPanel>
+     <WrapPanel Grid.Row="1" Grid.Column="1"><TextBlock Text="Comment Source: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/><TextBlock Text="{Binding CommentSource}"/></WrapPanel>
      <Grid Grid.Row="2" Margin="0,3,12,0">
       <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
       <DockPanel Margin="0,0,8,0">
-       <TextBlock Text="Converted Value: " FontWeight="SemiBold"/>
+       <TextBlock Text="Converted Value: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/>
        <TextBox Style="{StaticResource DetailText}" Text="{Binding ConvertedValueDisplay, Mode=OneWay}"/>
       </DockPanel>
       <DockPanel Grid.Column="1">
-       <TextBlock Text="Raw Value: " FontWeight="SemiBold"/>
+       <TextBlock Text="Raw Value: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/>
        <TextBox Style="{StaticResource DetailText}" Text="{Binding Value}"/>
       </DockPanel>
      </Grid>
      <DockPanel Grid.Row="2" Grid.Column="1" Margin="0,3,0,0">
-      <TextBlock Text="Full Comment: " FontWeight="SemiBold"/>
+      <TextBlock Text="Full Comment: " FontWeight="SemiBold" Style="{StaticResource FieldLabel}"/>
       <TextBox Style="{StaticResource DetailText}" Text="{Binding Comment}"/>
      </DockPanel>
     </Grid>
