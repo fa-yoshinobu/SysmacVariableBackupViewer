@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - Aligned local and CI release output at `artifacts/release/`, with a fixed-name distribution ZIP and UTF-8/LF SHA-256 checksum.
+- Refreshed the colour scheme: soft grid lines and selection, tinted header and info bar, a blue primary button, and per-column colours (variable names, data types, and green/grey BOOL values).
 
 ### Fixed
 
