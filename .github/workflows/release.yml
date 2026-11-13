@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - "v*"
-      - "V*"
-      - "Ver.*"
 
 permissions:
   contents: write
@@ -41,6 +39,7 @@ jobs:
         shell: pwsh
         run: |
           $tag = "${{ github.ref_name }}"
+          if ($tag -cnotmatch '^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z]+([.-][0-9A-Za-z]+)*)?$') { throw 'Use a SemVer tag such as v1.2.3.' }
 
           $patterns = @(
             '^v(?<version>\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$',
@@ -87,7 +86,7 @@ jobs:
           -p:FileVersion=${{ env.FILE_VERSION }}
           -p:InformationalVersion=${{ env.APP_VERSION }}
           --no-restore
-          -o artifacts\publish
+          -o artifacts\release
 
       - name: Set up release tools
         uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97
@@ -99,7 +98,7 @@ jobs:
         env:
           RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          python .github/scripts/release_assets.py prepare --repository "$env:GITHUB_REPOSITORY" --release-tag "$env:RELEASE_TAG" --asset-name SysmacVariableBackupViewer-win-x64.zip --file artifacts/publish/SysmacVariableBackupViewer.exe
+          python .github/scripts/release_assets.py prepare --repository "$env:GITHUB_REPOSITORY" --release-tag "$env:RELEASE_TAG" --asset-name SysmacVariableBackupViewer-win-x64.zip --file artifacts/release/SysmacVariableBackupViewer.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Publish ZIP and checksum

@@ -6,7 +6,7 @@ cd /d "%~dp0"
 set "PROJECT=SysmacXmlViewer\SysmacXmlViewer.csproj"
 set "CONFIG=Release"
 set "RUNTIME=win-x64"
-set "OUTDIR=artifacts\publish"
+set "OUTDIR=artifacts\release"
 set "DO_CLEAN=0"
 
 if /I "%~1"=="clean" set "DO_CLEAN=1"
@@ -30,7 +30,7 @@ if "%DO_CLEAN%"=="1" (
 )
 
 echo [1/3] restore...
-dotnet restore "%PROJECT%"
+dotnet restore "%PROJECT%" -r "%RUNTIME%"
 if errorlevel 1 goto :error
 
 echo [2/3] publish single-file exe...
@@ -45,6 +45,9 @@ dotnet publish "%PROJECT%" ^
   /p:DebugSymbols=false ^
   -o "%OUTDIR%"
 if errorlevel 1 goto :error
+
+powershell -NoProfile -Command "$ErrorActionPreference = 'Stop'; $zip = Join-Path $env:OUTDIR ('SysmacVariableBackupViewer-' + $env:RUNTIME + '.zip'); Compress-Archive -LiteralPath @((Join-Path $env:OUTDIR 'SysmacVariableBackupViewer.exe')) -DestinationPath $zip -Force; $line = ([BitConverter]::ToString([Security.Cryptography.SHA256]::Create().ComputeHash([IO.File]::ReadAllBytes($zip)))).Replace('-', '').ToLowerInvariant() + '  ' + [IO.Path]::GetFileName($zip) + [char]10; [IO.File]::WriteAllText($zip + '.sha256', $line, [Text.UTF8Encoding]::new($false))"
+if errorlevel 1 exit /b 1
 
 echo [3/3] done.
 echo Output: "%OUTDIR%\SysmacVariableBackupViewer.exe"

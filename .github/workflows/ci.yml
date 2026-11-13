@@ -45,17 +45,17 @@ jobs:
         run: dotnet test SysmacXmlViewer.sln -c Release --no-build --verbosity normal
 
       - name: Publish single-file executable
-        run: dotnet publish SysmacXmlViewer\SysmacXmlViewer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --no-restore -o artifacts\publish
+        run: dotnet publish SysmacXmlViewer\SysmacXmlViewer.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true --no-restore -o artifacts\release
 
       - name: Verify publish output
         shell: pwsh
         run: |
-          $exe = "artifacts/publish/SysmacVariableBackupViewer.exe"
+          $exe = "artifacts/release/SysmacVariableBackupViewer.exe"
           if (-not (Test-Path $exe)) {
             throw "Single-file executable was not created: $exe"
           }
 
-          $files = Get-ChildItem artifacts/publish -File
+          $files = Get-ChildItem artifacts/release -File
           if ($files.Count -ne 1) {
             throw "Expected a single published file, found $($files.Count)."
           }
