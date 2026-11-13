@@ -4,13 +4,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [1.0.10] - 2026-11-13
+
+### Added
+
+- Reproducible dummy backup and project metadata samples, with an updated screenshot and loading instructions.
+
 ### Changed
 
+- Migrated the application and build tooling to .NET 10; the Windows distribution includes the runtime.
 - Aligned local and CI release output at `artifacts/release/`, with a fixed-name distribution ZIP and UTF-8/LF SHA-256 checksum.
 - Refreshed the colour scheme: soft grid lines and selection, tinted header and info bar, a blue primary button, and per-column colours (variable names, data types, and green/grey BOOL values).
 
 ### Fixed
 
+- Keep BOOL values readable on selected cells and primary button text readable while pressed.
+- Handle VirusTotal upload conflicts and delayed analysis lookup.
 - Reject incomplete VirusTotal responses without a matching API-provided executable SHA-256.
 
 
