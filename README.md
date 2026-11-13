@@ -10,6 +10,8 @@
 
 ![SysmacVariableBackupViewer Screenshot](image1.png)
 
+Screenshot with synthetic data only. To reproduce it, open [dummy-backup.xml](docs/samples/dummy-backup.xml), then load [dummy-project.smc2](docs/samples/dummy-project.smc2) using **Load POU Names & Comments**. The SMC2 file contains only demonstration metadata for this viewer; it is not a runnable Sysmac Studio project.
+
 ---
 
 ## English
@@ -105,6 +107,8 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE).
 ### 概要
 
 ![SysmacVariableBackupViewer スクリーンショット](image1.png)
+
+画像はすべて架空のダミーデータです。[dummy-backup.xml](docs/samples/dummy-backup.xml)を開き、**Load POU Names & Comments**から[dummy-project.smc2](docs/samples/dummy-project.smc2)を読み込むと再現できます。SMC2ファイルは本ビューアーの表示確認用メタデータのみを含み、Sysmac Studioで実行できるプロジェクトではありません。
 
 SysmacVariableBackupViewerは、Sysmac StudioのXMLバックアップファイルを表示・分析するためのWindowsデスクトップアプリケーションです。高度なフィルタリング機能とエクスポート機能を備えた、使いやすいインターフェースで変数データを表示します。
 

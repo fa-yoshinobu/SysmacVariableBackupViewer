@@ -1,0 +1,76 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Content>
+  <Header>
+    <Project ID="demo-project" Name="Demo Packaging Line (Dummy Data)" Tracking="11111111-1111-4111-8111-111111111111">
+      <DeviceType>NJ</DeviceType>
+      <DeviceModelFull>NJ101-1000</DeviceModelFull>
+      <UnitVersion>1.10</UnitVersion>
+    </Project>
+    <Version>1.0</Version>
+    <EnableOffset>true</EnableOffset>
+  </Header>
+  <Body>
+    <RetainVariable>
+      <Item Name="VAR:/DemoMode" DataType="BOOL" Offset="0">
+        <Data>True</Data>
+      </Item>
+      <Item Name="VAR:/ProductCode" DataType="STRING[32]" Offset="8">
+        <Data>44454D4F2D504152542D4100</Data>
+      </Item>
+      <Item Name="VAR:/TargetCount" DataType="UINT" Offset="16">
+        <Data>1200</Data>
+      </Item>
+      <Item Name="VAR:/GoodCount" DataType="UDINT" Offset="24">
+        <Data>856</Data>
+      </Item>
+      <Item Name="VAR:/RejectCount" DataType="UINT" Offset="32">
+        <Data>3</Data>
+      </Item>
+      <Item Name="VAR:/AlarmCode" DataType="WORD" Offset="40">
+        <Data>0</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/AutoRun" DataType="BOOL" Offset="48">
+        <Data>True</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/StepNo" DataType="INT" Offset="56">
+        <Data>30</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/ConveyorSpeed" DataType="REAL" Offset="64">
+        <Data>00004841</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/CycleTime" DataType="TIME" Offset="72">
+        <Data>2450000000</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/StationReady[0]" DataType="BOOL" Offset="80">
+        <Data>True</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/StationReady[1]" DataType="BOOL" Offset="88">
+        <Data>True</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/StationReady[2]" DataType="BOOL" Offset="96">
+        <Data>False</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/Recipe.Name" DataType="STRING[32]" Offset="104">
+        <Data>44454D4F2D5245434950452D303100</Data>
+      </Item>
+      <Item Name="VAR://22222222222242228222222222222222/Recipe.BatchSize" DataType="UINT" Offset="112">
+        <Data>100</Data>
+      </Item>
+      <Item Name="VAR://33333333333343338333333333333333/SetPoint" DataType="REAL" Offset="120">
+        <Data>00003443</Data>
+      </Item>
+      <Item Name="VAR://33333333333343338333333333333333/ActualTemp" DataType="REAL" Offset="128">
+        <Data>00C03343</Data>
+      </Item>
+      <Item Name="VAR://33333333333343338333333333333333/HeaterOutput" DataType="LREAL" Offset="136">
+        <Data>0000000000404F40</Data>
+      </Item>
+      <Item Name="VAR://33333333333343338333333333333333/InRange" DataType="BOOL" Offset="144">
+        <Data>True</Data>
+      </Item>
+      <Item Name="VAR://33333333333343338333333333333333/SoakTime" DataType="TIME" Offset="152">
+        <Data>90000000000</Data>
+      </Item>
+    </RetainVariable>
+  </Body>
+</Content>
