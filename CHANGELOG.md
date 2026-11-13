@@ -4,6 +4,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Aligned local and CI release output at `artifacts/release/`, with a fixed-name distribution ZIP and UTF-8/LF SHA-256 checksum.
+
+### Fixed
+
+- Reject incomplete VirusTotal responses without a matching API-provided executable SHA-256.
+
+
 ## [1.0.9] - 2026-11-04
 
 ### Added
